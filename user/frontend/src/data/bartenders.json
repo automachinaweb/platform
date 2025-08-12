@@ -1,0 +1,58 @@
+[
+  {
+    "id": "1",
+    "name": "Marcus Rodriguez",
+    "rating": 4.9,
+    "experience": "8 years",
+    "specialties": ["Craft Cocktails", "Wine Pairing", "Corporate Events"],
+    "price": "$75/hour",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    "bio": "Expert mixologist with 8 years of experience in high-end establishments. Specialized in craft cocktails and wine pairings.",
+    "reviews": 127,
+    "location": "Manhattan, NY",
+    "verified": true,
+    "availability": ["Friday", "Saturday", "Sunday"]
+  },
+  {
+    "id": "2",
+    "name": "Isabella Chen",
+    "rating": 4.8,
+    "experience": "6 years",
+    "specialties": ["Molecular Mixology", "Asian Fusion", "Private Parties"],
+    "price": "$65/hour",
+    "avatar": "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+    "bio": "Creative bartender specializing in molecular mixology and Asian-inspired cocktails. Perfect for innovative private events.",
+    "reviews": 94,
+    "location": "Brooklyn, NY",
+    "verified": true,
+    "availability": ["Thursday", "Friday", "Saturday"]
+  },
+  {
+    "id": "3",
+    "name": "James Thompson",
+    "rating": 4.7,
+    "experience": "10 years",
+    "specialties": ["Classic Cocktails", "Whiskey Expert", "Wedding Events"],
+    "price": "$80/hour",
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    "bio": "Veteran bartender with a passion for classic cocktails and whiskey. Extensive experience in wedding and formal events.",
+    "reviews": 156,
+    "location": "Queens, NY",
+    "verified": true,
+    "availability": ["Friday", "Saturday", "Sunday"]
+  },
+  {
+    "id": "4",
+    "name": "Sofia Martinez",
+    "rating": 4.9,
+    "experience": "5 years",
+    "specialties": ["Tequila & Mezcal", "Latin Cocktails", "Birthday Parties"],
+    "price": "$60/hour",
+    "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    "bio": "Passionate about Latin American spirits and cocktails. Brings vibrant energy to every celebration.",
+    "reviews": 89,
+    "location": "Bronx, NY",
+    "verified": true,
+    "availability": ["Wednesday", "Friday", "Saturday"]
+  }
+]

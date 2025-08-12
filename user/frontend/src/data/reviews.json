@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1",
+    "customerName": "Sarah Johnson",
+    "rating": 5,
+    "comment": "Marcus was absolutely phenomenal! The cocktails were restaurant-quality and he made our anniversary party unforgettable.",
+    "date": "2024-01-15",
+    "bartenderName": "Marcus Rodriguez",
+    "event": "Anniversary Party"
+  },
+  {
+    "id": "2",
+    "customerName": "David Kim",
+    "rating": 5,
+    "comment": "Isabella's molecular cocktails were the talk of our corporate event. Professional, creative, and punctual!",
+    "date": "2024-01-10",
+    "bartenderName": "Isabella Chen",
+    "event": "Corporate Event"
+  },
+  {
+    "id": "3",
+    "customerName": "Maria Gonzalez",
+    "rating": 4,
+    "comment": "James knows his whiskey! Great selection and perfect for our wedding reception. Highly recommend.",
+    "date": "2024-01-08",
+    "bartenderName": "James Thompson",
+    "event": "Wedding Reception"
+  }
+]
