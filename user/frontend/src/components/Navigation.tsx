@@ -140,8 +140,7 @@ const Navigation = ({ onLogin }: NavigationProps) => {
     }
   };
 
-  console.log(loginData, registerData);
-
+  console.log(loginData);
   return (
     <>
       <Header
