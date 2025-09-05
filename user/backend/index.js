@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes - Note the path change
-app.use('/user/auth', authRoutes);  // Changed from /user/auth to /api/auth
+app.use('/user/auth', authRoutes);  
 
 // MongoDB Connection
 const mongo_uri = process.env.MONGO_URI;
