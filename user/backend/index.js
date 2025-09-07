@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
+const bookingRoutes = require('./routes/booking.routes');
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.use(express.json());
 
 // Routes - Note the path change
 app.use('/user/auth', authRoutes);  
+app.use('/user/bookings', bookingRoutes);
+  
 
 // MongoDB Connection
 const mongo_uri = process.env.MONGO_URI;
