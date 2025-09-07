@@ -1,5 +1,5 @@
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import Header from "@/components/Header";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,11 +37,7 @@ const BartenderProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onShowRegister={function (): void {
-        throw new Error("Function not implemented.");
-      } } onShowLogin={function (): void {
-        throw new Error("Function not implemented.");
-      } } />
+      
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import Header from "@/components/Header";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,11 +176,7 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onShowRegister={function (): void {
-        throw new Error("Function not implemented.");
-      } } onShowLogin={function (): void {
-        throw new Error("Function not implemented.");
-      } } />
+      
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 h-[calc(100vh-80px)]">
         <div className="max-w-4xl mx-auto h-full flex flex-col">

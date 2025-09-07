@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+
 import HeroSection from "@/components/HeroSection";
 import StatsSection from "@/components/StatsSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
@@ -21,7 +21,7 @@ const LandingPage = ({ onLogin }: LandingPageProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation onLogin={onLogin} />
+      
       <HeroSection 
         onFindBartender={handleFindBartender}
       />

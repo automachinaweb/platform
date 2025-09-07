@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Header from "@/components/Header";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,12 +7,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 interface NavigationProps {
-  onLogin: () => void;
+  onLogin: (name: string) => void;
+  showLogin: boolean;
+  setShowLogin: (show: boolean) => void;
+  showRegister: boolean;
+  setShowRegister: (show: boolean) => void;
 }
 
-const Navigation = ({ onLogin }: NavigationProps) => {
-  const [showRegister, setShowRegister] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
+const Navigation = ({ onLogin, showLogin, setShowLogin, showRegister, setShowRegister }: NavigationProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -127,7 +128,10 @@ const Navigation = ({ onLogin }: NavigationProps) => {
       // Save user data
       localStorage.setItem("token", result.token);
       localStorage.setItem("email", loginData.email);
-      localStorage.setItem("name", loginData.email?.split('@')[0] || "User");
+      const userName = loginData.email?.split('@')[0] || "User";
+      localStorage.setItem("name", userName);
+
+      onLogin(userName);
 
       setShowLogin(false);
       navigate('/booking');
@@ -145,15 +149,8 @@ const Navigation = ({ onLogin }: NavigationProps) => {
     }
   };
 
-  // console.log(loginData);
-  console.log(registerData);
   return (
     <>
-      <Header
-        onShowRegister={() => setShowRegister(true)}
-        onShowLogin={() => setShowLogin(true)}
-      />
-
       {/* Register Modal */}
       <Dialog open={showRegister} onOpenChange={setShowRegister}>
         <DialogContent className="max-w-md">

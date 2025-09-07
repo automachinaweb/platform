@@ -1,14 +1,21 @@
-// src/components/Header.tsx
-
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface HeaderProps {
+  isLoggedIn: boolean;
+  userName: string;
   onShowRegister: () => void;
   onShowLogin: () => void;
+  onLogout: () => void;
 }
 
-const Header = ({ onShowRegister, onShowLogin }: HeaderProps) => {
+const Header = ({ isLoggedIn, userName, onShowRegister, onShowLogin, onLogout }: HeaderProps) => {
+  const navigate = useNavigate();
+
+  const handleUserNameClick = () => {
+    navigate("/notfound");
+  };
+
   return (
     <header className="bg-background border-b border-border shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,12 +56,23 @@ const Header = ({ onShowRegister, onShowLogin }: HeaderProps) => {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <Button variant="hero-outline" size="sm" onClick={onShowRegister}>
-              Register
-            </Button>
-            <Button variant="hero" size="sm" onClick={onShowLogin}>
-              Login
-            </Button>
+            {isLoggedIn ? (
+              <>
+                <Button variant="ghost" onClick={handleUserNameClick}>{userName}</Button>
+                <Button variant="hero" size="sm" onClick={onLogout}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="hero-outline" size="sm" onClick={onShowRegister}>
+                  Register
+                </Button>
+                <Button variant="hero" size="sm" onClick={onShowLogin}>
+                  Login
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
