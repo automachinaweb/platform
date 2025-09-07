@@ -53,20 +53,26 @@ const Navigation = ({ onLogin }: NavigationProps) => {
     }
 
     try {
+      const payload = {
+        name: registerData.username,
+        email: registerData.email,
+        password: registerData.password,
+      };
+
       const response = await fetch('http://localhost:3000/user/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(registerData),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
 
-      if (!result.success) {
+      if (!response.ok) {
         toast({
           title: "Registration Failed",
-          description: result.message || "Please try again",
+          description: result?.message || "Please try again",
           variant: "destructive",
         });
         return;
@@ -109,10 +115,10 @@ const Navigation = ({ onLogin }: NavigationProps) => {
 
       const result = await response.json();
       
-      if (!result.success) {
+      if (!response.ok || !result?.token) {
         toast({
           title: "Login Failed",
-          description: result.message || "Please try again",
+          description: result?.message || "Please try again",
           variant: "destructive",
         });
         return;
@@ -121,8 +127,7 @@ const Navigation = ({ onLogin }: NavigationProps) => {
       // Save user data
       localStorage.setItem("token", result.token);
       localStorage.setItem("email", loginData.email);
-      localStorage.setItem("name", result.user?.firstName || "User");
-      localStorage.setItem("phone", result.user?.phone || "1234567890");
+      localStorage.setItem("name", loginData.email?.split('@')[0] || "User");
 
       setShowLogin(false);
       navigate('/booking');
@@ -140,7 +145,8 @@ const Navigation = ({ onLogin }: NavigationProps) => {
     }
   };
 
-  console.log(loginData);
+  // console.log(loginData);
+  console.log(registerData);
   return (
     <>
       <Header
