@@ -16,11 +16,11 @@ const bartenderSchema = new mongoose.Schema({
     },
     phoneNo: {
         type: String,
-        required: true
+        required: false
     },
     profileUrl: {
         type: String,
-        required: true
+        required: false
     },
     role: {
         type: String,

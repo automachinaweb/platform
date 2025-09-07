@@ -18,30 +18,90 @@ const Layout = () => {
     email: "", username: "", password: ""
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loginForm.email && loginForm.password) {
-      localStorage.setItem('bartender-email', loginForm.email);
-      setLoginOpen(false);
-      toast({
-        title: "Welcome back!",
-        description: "You've successfully logged in.",
-      });
-      navigate('/questionnaire');
+      try {
+        const response = await fetch('http://localhost:3001/bartender/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: loginForm.email,
+            password: loginForm.password,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('bartender-logged-in', 'true');
+          localStorage.setItem('bartender-email', loginForm.email);
+          setIsLoggedIn(true);
+          setLoginOpen(false);
+          toast({
+            title: "Welcome back!",
+            description: "You've successfully logged in.",
+          });
+          navigate('/questionnaire');
+        } else {
+          const errorData = await response.json();
+          toast({
+            title: "Login Failed",
+            description: errorData.message || "Invalid credentials.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred during login.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (registerForm.email && registerForm.username && registerForm.password) {
-      localStorage.setItem('bartender-email', registerForm.email);
-      localStorage.setItem('bartender-username', registerForm.username);
-      setRegisterOpen(false);
-      setLoginOpen(true);
-      toast({
-        title: "Registration successful!",
-        description: "Please login with your credentials.",
-      });
+      try {
+        const response = await fetch('http://localhost:3001/bartender/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: registerForm.username, // Mapping username to name for the backend
+            email: registerForm.email,
+            password: registerForm.password,
+          }),
+        });
+
+        if (response.ok) {
+          setRegisterOpen(false);
+          setLoginOpen(true); // Open login dialog after successful registration
+          toast({
+            title: "Registration successful!",
+            description: "Please login with your credentials.",
+          });
+        } else {
+          const errorData = await response.json();
+          toast({
+            title: "Registration Failed",
+            description: errorData.message || "An error occurred during registration.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Registration error:", error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred during registration.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -51,13 +111,7 @@ const Layout = () => {
     navigate('/');
   };
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/questionnaire';
-  const isDashboard = location.pathname === '/dashboard';
-  const isChat = location.pathname === '/chat';
-
-  if (!isLoggedIn || isAuthPage) {
-    return <Outlet />;
-  }
+  console.log(registerForm);
 
   return (
     <div className="min-h-screen bg-background">
