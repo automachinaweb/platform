@@ -9,16 +9,11 @@ const signup = async (req, res) => {
             name, 
             email, 
             password, 
-            phone_number,
-            yearsOfExperience,
-            specialties,
-            hourlyRate,
-            serviceLocation,
-            availability,
-            professionalBio
+            phoneNo,
+            profileUrl
         } = req.body;
 
-        console.log('Signup attempt for:', email); // Add logging
+ 
 
         // Check if bartender exists
         const existingBartender = await Bartender.findOne({ email });
@@ -28,24 +23,19 @@ const signup = async (req, res) => {
 
         // Hash password
         const salt = await bcrypt.genSalt(10);
-        const password_hash = await bcrypt.hash(password, salt);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         // Create new bartender with profile info
         const bartender = new Bartender({
             name,
             email,
-            password_hash,
-            phone_number,
-            yearsOfExperience,
-            specialties,
-            hourlyRate,
-            serviceLocation,
-            availability,
-            professionalBio
+            password: hashedPassword,
+            phoneNo,
+            profileUrl
         });
 
         await bartender.save();
-        console.log('Bartender created successfully:', bartender._id); // Add logging
+
         
         res.status(201).json({
             message: 'Bartender created successfully',
@@ -64,17 +54,16 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log('Login attempt for:', email); // Add logging
 
         const bartender = await Bartender.findOne({ email });
         if (!bartender) {
-            console.log('No bartender found with email:', email); // Add logging
+
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
-        const isValidPassword = await bcrypt.compare(password, bartender.password_hash);
+        const isValidPassword = await bcrypt.compare(password, bartender.password);
         if (!isValidPassword) {
-            console.log('Invalid password for:', email); // Add logging
+
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
@@ -88,7 +77,7 @@ const login = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        console.log('Login successful for:', email); // Add logging
+
         res.json({ 
             token,
             user: {
