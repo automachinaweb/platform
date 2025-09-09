@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth.routes');
 const questionnaireRoutes = require('./routes/questionnaire.routes'); // New import
+const bartenderRoutes = require('./routes/bartender.routes');
 const cors = require('cors');
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 // Routes
 app.use('/bartender/auth', authRoutes);
 app.use('/bartender/questionnaire', questionnaireRoutes); // New route
+app.use('/bartender', bartenderRoutes);
 
 // MongoDB Connection
 const mongo_uri = process.env.MONGO_URI;

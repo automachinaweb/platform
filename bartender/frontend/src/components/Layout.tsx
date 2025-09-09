@@ -38,9 +38,9 @@ const Layout = () => {
           const data = await response.json();
           localStorage.setItem('bartender-logged-in', 'true');
           localStorage.setItem('bartender-email', loginForm.email);
-          localStorage.setItem('bartender-username', data.username); // Assuming backend returns username on login
+          localStorage.setItem('bartender-username', data.user.name); // Assuming backend returns username on login
           setIsLoggedIn(true);
-          setUsername(data.username);
+          setUsername(data.user.name);
           setLoginOpen(false);
           toast({
             title: "Welcome back!",
@@ -152,7 +152,13 @@ const Layout = () => {
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <>
-                <span className="text-foreground font-medium">Welcome, {username}!</span>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/dashboard')}
+                  className="text-foreground font-medium"
+                >
+                  Welcome, {username}!
+                </Button>
                 <Button
                   variant="ghost"
                   onClick={handleLogout}
