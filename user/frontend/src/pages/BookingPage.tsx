@@ -224,7 +224,7 @@ const dropdownOptions = {
                     onClick={currentStep === 4 ? undefined : handleNextStep}
                     disabled={(currentStep === 1 && !isStep1Valid) || (currentStep === 2 && !isStep2Valid)}
                   >
-                    {currentStep === 3 ? "Find a Bartender" : "Next Step"}
+                    {currentStep === 4 ? "Find a Bartender" : "Next Step"}
                   </Button>
                 </div>
               </form>
