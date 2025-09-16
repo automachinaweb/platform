@@ -1,31 +1,37 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../db');
 
-const bartenderSchema = new mongoose.Schema({
+const Bartender = sequelize.define('Bartender', {
     name: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     email: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true
     },
-    password: {
-        type: String,
-        required: true
+    password_hash: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     phoneNo: {
-        type: String,
-        required: false
+        type: DataTypes.STRING,
+        allowNull: true
     },
     profileUrl: {
-        type: String,
-        required: false
+        type: DataTypes.STRING,
+        allowNull: true
     },
     role: {
-        type: String,
-        default: "bartender"
+        type: DataTypes.ENUM('ADMIN', 'USER', 'BARTENDER'),
+        defaultValue: 'BARTENDER'
     }
-}, { timestamps: true });
+}, {
+    tableName: 'bartenders',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+});
 
-module.exports = mongoose.model('Bartender', bartenderSchema);
+module.exports = Bartender;

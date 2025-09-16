@@ -5,64 +5,49 @@ const submitQuestionnaire = async (req, res) => {
     try {
         const { yearsOfExperience, specialties, certifications, hourlyRate, location, availability, bio, portfolio } = req.body;
         const bartenderId = req.userId; // From authentication middleware
-        console.log('Questionnaire Controller: received bartenderId:', bartenderId); // Debugging line
 
-        if (!yearsOfExperience) {
-            return res.status(400).json({ message: 'Years of experience is required.' });
-        }
-        // Specialties is an array, so check if it's an array and not empty
-        if (!specialties || !Array.isArray(specialties) || specialties.length === 0) {
-            return res.status(400).json({ message: 'At least one specialty is required.' });
-        }
-        // Certifications is optional, so no required check here, but it should be a string if provided
-        if (certifications && typeof certifications !== 'string') {
-            return res.status(400).json({ message: 'Certifications must be a string.' });
-        }
-        // Hourly Rate is required and must be a number
-        if (typeof hourlyRate !== 'number' || hourlyRate <= 0) {
-            return res.status(400).json({ message: 'Valid hourly rate is required.' });
-        }
-        // Location is required and must be a string
-        if (!location || typeof location !== 'string' || location.trim().length === 0) {
-            return res.status(400).json({ message: 'Service location is required.' });
-        }
-        // Availability is an array, so check if it's an array and not empty
-        if (!availability || !Array.isArray(availability) || availability.length === 0) {
-            return res.status(400).json({ message: 'At least one availability option is required.' });
-        }
-        // Bio is optional, so no required check here, but it should be a string if provided
-        if (bio && typeof bio !== 'string') {
-            return res.status(400).json({ message: 'Bio must be a string.' });
-        }
-        // Portfolio is optional, so no required check here, but it should be a string if provided
-        if (portfolio && typeof portfolio !== 'string') {
-            return res.status(400).json({ message: 'Portfolio must be a string.' });
-        }
-
+        // Validation can be improved with a library like Joi, but keeping it simple for now.
+        // The database model will also perform some validation.
 
         // Fetch bartender's name and email
-        const bartender = await Bartender.findById(bartenderId);
-        console.log('Questionnaire Controller: Bartender found:', !!bartender); // Debugging line
+        const bartender = await Bartender.findByPk(bartenderId);
         if (!bartender) {
             return res.status(404).json({ message: 'Bartender not found.' });
         }
 
-        const questionnaire = new Questionnaire({
+        // Check if a questionnaire for this email already exists
+        const existingQuestionnaire = await Questionnaire.findOne({ where: { email: bartender.email } });
+        if (existingQuestionnaire) {
+            // Update existing questionnaire
+            await existingQuestionnaire.update({
+                name: bartender.name,
+                yearsOfExperience,
+                specialties,
+                certifications,
+                hourlyRate,
+                location,
+                availability,
+                bio,
+                portfolio
+            });
+            return res.status(200).json({ message: 'Questionnaire updated successfully!', questionnaireId: existingQuestionnaire.id });
+        }
+
+        // Create new questionnaire
+        const questionnaire = await Questionnaire.create({
             name: bartender.name,
             email: bartender.email,
-            yearsOfExperience: yearsOfExperience,
-            specialties: specialties,
-            certifications: certifications,
-            hourlyRate: hourlyRate,
-            location: location,
-            availability: availability,
-            bio: bio,
-            portfolio: portfolio
+            yearsOfExperience,
+            specialties,
+            certifications,
+            hourlyRate,
+            location,
+            availability,
+            bio,
+            portfolio
         });
 
-        await questionnaire.save();
-
-        res.status(201).json({ message: 'Questionnaire submitted successfully!', questionnaireId: questionnaire._id });
+        res.status(201).json({ message: 'Questionnaire submitted successfully!', questionnaireId: questionnaire.id });
 
     } catch (error) {
         console.error('Error submitting questionnaire:', error);

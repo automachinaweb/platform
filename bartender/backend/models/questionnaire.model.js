@@ -1,60 +1,53 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../db');
 
-const QuestionnaireSchema = new mongoose.Schema({
+const Questionnaire = sequelize.define('Questionnaire', {
     name: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     email: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true // Assuming one questionnaire per bartender (email)
     },
     yearsOfExperience: {
-        type: String,
-        required: true,
-        enum: ['1-2 years', '3-5 years', '6-10 years', '10+ years']
+        type: DataTypes.ENUM('1-2 years', '3-5 years', '6-10 years', '10+ years'),
+        allowNull: false
     },
     specialties: {
-        type: [String],
-        enum: [
-            'Classic Cocktails',
-            'Craft Cocktails',
-            'Wine Service',
-            'Beer Expert',
-            'Molecular Mixology',
-            'Tiki Cocktails',
-            'Corporate Events',
-            'Wedding Receptions'
-        ]
+        type: DataTypes.JSONB,
+        allowNull: true
     },
     certifications: {
-        type: String
+        type: DataTypes.STRING,
+        allowNull: true
     },
     hourlyRate: {
-        type: Number,
-        required: true
+        type: DataTypes.FLOAT,
+        allowNull: false
     },
     location: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     availability: {
-        type: [String],
-        enum: [
-            'Weekday Evenings',
-            'Weekend Days',
-            'Weekend Evenings',
-            'Corporate Events',
-            'Private Parties',
-            'Holiday Events'
-        ]
+        type: DataTypes.JSONB,
+        allowNull: true
     },
     bio: {
-        type: String
+        type: DataTypes.STRING,
+        allowNull: true
     },
     portfolio: {
-        type: String
+        type: DataTypes.STRING,
+        allowNull: true
     }
-}, { timestamps: true });
+}, {
+    tableName: 'questionnaires',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+});
 
-module.exports = mongoose.model('Questionnaire', QuestionnaireSchema);
+module.exports = Questionnaire;
