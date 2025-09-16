@@ -1,60 +1,39 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../db');
 
-const userSchema = new mongoose.Schema({
+const User = sequelize.define('User', {
     name: {
-        type: String,
-        required: true,
-        trim: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
     },
     password_hash: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     role: {
-        type: String,
-        enum: ['ADMIN', 'USER', 'BARTENDER'], // Add your specific roles here
-        default: 'USER'
+        type: DataTypes.ENUM('ADMIN', 'USER', 'BARTENDER'),
+        defaultValue: 'USER'
     },
     profile_image: {
-        type: String,
-        default: null
+        type: DataTypes.STRING
     },
     phone_number: {
-        type: String,
-        trim: true,
-        default: null
+        type: DataTypes.STRING
     },
     status: {
-        type: String,
-        enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED'],
-        default: 'ACTIVE'
-    },
-    created_at: {
-        type: Date,
-        default: Date.now
-    },
-    updated_at: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED'),
+        defaultValue: 'ACTIVE'
     }
 }, {
-    timestamps: { 
-        createdAt: 'created_at',
-        updatedAt: 'updated_at'
-    },
-    collection: 'users' // Explicitly set the collection name to 'users'
+    tableName: 'users',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
 });
 
-// Update the updated_at field on save
-userSchema.pre('save', function(next) {
-    this.updated_at = new Date();
-    next();
-});
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;

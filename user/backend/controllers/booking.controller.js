@@ -4,9 +4,7 @@ const Booking = require('../models/booking.model');
 exports.createBooking = async (req, res) => {
     try {
         // A new booking is created with the data from the request body.
-        const newBooking = new Booking(req.body);
-        // The new booking is saved to the database.
-        const savedBooking = await newBooking.save();
+        const savedBooking = await Booking.create(req.body);
         // The saved booking is sent back as a response.
         res.status(201).json(savedBooking);
     } catch (error) {

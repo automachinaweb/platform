@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
+
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const bookingRoutes = require('./routes/booking.routes');
@@ -21,11 +21,17 @@ app.use('/user/auth', authRoutes);
 app.use('/user/bookings', bookingRoutes);
   
 
-// MongoDB Connection
-const mongo_uri = process.env.MONGO_URI;
-mongoose.connect(mongo_uri)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('MongoDB connection error:', err));
+const sequelize = require('./db');
+
+// Test the database connection
+sequelize.authenticate()
+    .then(() => console.log('Database connected...'))
+    .catch(err => console.log('Error: ' + err));
+
+// Sync all models
+sequelize.sync()
+    .then(() => console.log('Models synchronized...'))
+    .catch(err => console.log('Error synchronizing models: ' + err));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
