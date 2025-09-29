@@ -44,6 +44,7 @@ const Questionnaire = () => {
     courseDuration: "",
     courseYear: "",
     courseGrade: "",
+    courseSpecializations: "",
 
     responsibleBeverageCertificate: false,
     responsibleBeverageAuthority: "",
@@ -269,7 +270,7 @@ const Questionnaire = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="aadhaar">Aadhaar Number</Label>
-                    <Input id="aadhaar" value={formData.aadhaar} onChange={(e) => setFormData(prev => ({...prev, aadhaar: e.gitch.target.value}))} />
+                    <Input id="aadhaar" value={formData.aadhaar} onChange={(e) => setFormData(prev => ({...prev, aadhaar: e.target.value}))} />
                   </div>
                   <div>
                     <Label htmlFor="pan">PAN Card Number</Label>
