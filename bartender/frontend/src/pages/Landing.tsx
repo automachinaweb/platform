@@ -60,126 +60,138 @@ const Landing = () => {
             build lasting client relationships, and take your bartending career to the next level.
           </p>
           <div className="flex gap-4 justify-center">
-            <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
-              <DialogTrigger asChild>
-                <Button size="lg" className="text-lg px-8 py-6">
-                  Start Your Journey
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-center text-xl">Join PourConnect</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <Button variant="outline" className="w-full">
-                    Continue with Google
+            {localStorage.getItem('bartender-email') ? (
+              <Button size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/questionnaire')}>
+                Start Your Journey
+              </Button>
+            ) : (
+              <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="text-lg px-8 py-6">
+                    Start Your Journey
                   </Button>
-                  <div className="text-center text-sm text-muted-foreground">OR</div>
-                  <form onSubmit={handleRegister} className="space-y-4">
-                    <div>
-                      <Label htmlFor="register-email">Email</Label>
-                      <Input
-                        id="register-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={registerForm.email}
-                        onChange={(e) => setRegisterForm({...registerForm, email: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="register-username">Username</Label>
-                      <Input
-                        id="register-username"
-                        type="text"
-                        placeholder="Choose a username"
-                        value={registerForm.username}
-                        onChange={(e) => setRegisterForm({...registerForm, username: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="register-password">Password</Label>
-                      <Input
-                        id="register-password"
-                        type="password"
-                        placeholder="Create a password"
-                        value={registerForm.password}
-                        onChange={(e) => setRegisterForm({...registerForm, password: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-                      Register
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-center text-xl">Join PourConnect</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <Button variant="outline" className="w-full">
+                      Continue with Google
                     </Button>
-                  </form>
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => {setRegisterOpen(false); setLoginOpen(true);}}
-                      className="text-sm text-muted-foreground hover:text-primary"
-                    >
-                      Already registered? Login
-                    </button>
+                    <div className="text-center text-sm text-muted-foreground">OR</div>
+                    <form onSubmit={handleRegister} className="space-y-4">
+                      <div>
+                        <Label htmlFor="register-email">Email</Label>
+                        <Input
+                          id="register-email"
+                          type="email"
+                          placeholder="Enter your email"
+                          value={registerForm.email}
+                          onChange={(e) => setRegisterForm({...registerForm, email: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="register-username">Username</Label>
+                        <Input
+                          id="register-username"
+                          type="text"
+                          placeholder="Choose a username"
+                          value={registerForm.username}
+                          onChange={(e) => setRegisterForm({...registerForm, username: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="register-password">Password</Label>
+                        <Input
+                          id="register-password"
+                          type="password"
+                          placeholder="Create a password"
+                          value={registerForm.password}
+                          onChange={(e) => setRegisterForm({...registerForm, password: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+                        Register
+                      </Button>
+                    </form>
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => {setRegisterOpen(false); setLoginOpen(true);}}
+                        className="text-sm text-muted-foreground hover:text-primary"
+                      >
+                        Already registered? Login
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogContent>
+              </Dialog>
+            )}
 
-            <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
-              <DialogTrigger asChild>
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6">
-                  I'm Already a Member
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-center text-xl">Welcome Back</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <Button variant="outline" className="w-full">
-                    Continue with Google
+            {localStorage.getItem('bartender-email') ? (
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6" onClick={() => navigate('/dashboard')}>
+                I'm Already a Member
+              </Button>
+            ) : (
+              <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                    I'm Already a Member
                   </Button>
-                  <div className="text-center text-sm text-muted-foreground">OR</div>
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div>
-                      <Label htmlFor="login-email">Email</Label>
-                      <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={loginForm.email}
-                        onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="login-password">Password</Label>
-                      <Input
-                        id="login-password"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={loginForm.password}
-                        onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-                      Login
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-center text-xl">Welcome Back</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <Button variant="outline" className="w-full">
+                      Continue with Google
                     </Button>
-                  </form>
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => {setLoginOpen(false); setRegisterOpen(true);}}
-                      className="text-sm text-muted-foreground hover:text-primary"
-                    >
-                      Not a user? Register
-                    </button>
+                    <div className="text-center text-sm text-muted-foreground">OR</div>
+                    <form onSubmit={handleLogin} className="space-y-4">
+                      <div>
+                        <Label htmlFor="login-email">Email</Label>
+                        <Input
+                          id="login-email"
+                          type="email"
+                          placeholder="Enter your email"
+                          value={loginForm.email}
+                          onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="login-password">Password</Label>
+                        <Input
+                          id="login-password"
+                          type="password"
+                          placeholder="Enter your password"
+                          value={loginForm.password}
+                          onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+                        Login
+                      </Button>
+                    </form>
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => {setLoginOpen(false); setRegisterOpen(true);}}
+                        className="text-sm text-muted-foreground hover:text-primary"
+                      >
+                        Not a user? Register
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </div>
       </section>
@@ -229,7 +241,13 @@ const Landing = () => {
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Join thousands of professional bartenders who trust PourConnect to grow their business.
           </p>
-          <Button size="lg" onClick={() => setRegisterOpen(true)} className="text-lg px-8 py-6">
+          <Button size="lg" onClick={() => {
+            if (localStorage.getItem('bartender-email')) {
+              navigate('/questionnaire');
+            } else {
+              setRegisterOpen(true);
+            }
+          }} className="text-lg px-8 py-6">
             Get Started Today
           </Button>
         </div>

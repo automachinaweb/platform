@@ -15,6 +15,8 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+const emptyStringsToNull = require('./middleware/emptyStringsToNull.middleware');
+app.use(emptyStringsToNull);
 
 // Routes
 app.use('/bartender/auth', authRoutes);

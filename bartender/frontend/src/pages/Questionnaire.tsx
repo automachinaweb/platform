@@ -176,7 +176,37 @@ const Questionnaire = () => {
     notableEvents: "",
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/bartender/questionnaire/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("Questionnaire submitted successfully:", responseData);
+        setTimeout(() => {
+          localStorage.setItem('bartender-profile', JSON.stringify(formData));
+          localStorage.setItem('bartender-logged-in', 'true');
+          toast({
+            title: "Waiting for admin approval",
+            description: "Your profile has been submitted and is under review.",
+            className: "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
+          });
+          navigate('/dashboard');
+        }, 1000);
+      } else {
+        console.error("Questionnaire submission failed:", response.statusText);
+        // Handle error appropriately, e.g., show a message to the user
+      }
+    } catch (error) {
+      console.error("An error occurred during questionnaire submission:", error);
+      // Handle error appropriately, e.g., show a message to the user
+    }
     // Simulate API call
     setTimeout(() => {
       localStorage.setItem('bartender-profile', JSON.stringify(formData));
@@ -194,6 +224,8 @@ const Questionnaire = () => {
   const prevStep = () => setCurrentStep(prev => prev - 1);
 
   const stepTitles = ["Personal Information & Identity Verification", "PROFESSIONAL QUALIFICATIONS", "WORK EXPERIENCE & PROFESSIONAL BACKGROUND", "BARTENDING SKILLS & EXPERTISE ASSESSMENT", "PROFESSIONAL EQUIPMENT & TOOLS", "LANGUAGE & COMMUNICATION SKILLS", "SOCIAL MEDIA & ONLINE PRESENCE and LEGAL & COMPLIANCE", "ADDITIONAL INFORMATION"];
+
+  console.log(formData);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4 flex items-center justify-center">

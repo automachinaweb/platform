@@ -15,6 +15,8 @@ app.use(cors({
 // Middleware
 app.use(cors());
 app.use(express.json());
+const emptyStringsToNull = require('./middleware/emptyStringsToNull.middleware.js');
+app.use(emptyStringsToNull);
 
 // Routes - Note the path change
 app.use('/user/auth', authRoutes);  

@@ -259,7 +259,6 @@ exports.createBooking = async (req, res) => {
         });
         // The saved booking is sent back as a response.
         res.status(201).json(savedBooking);
-        console.log(savedBooking);
     } catch (error) {
         // If there is an error, a 500 status code is sent back with an error message.
         res.status(500).json({ message: error.message });

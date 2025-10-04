@@ -204,9 +204,29 @@ const dropdownOptions = {
     handlePrevStep();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/bartenders", { state: { bookingData: formData } });
+    try {
+      const response = await fetch("http://localhost:3000/user/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("Booking successful:", responseData);
+        navigate("/bartenders", { state: { bookingData: formData } });
+      } else {
+        console.error("Booking failed:", response.statusText);
+        // Handle error appropriately, e.g., show a message to the user
+      }
+    } catch (error) {
+      console.error("An error occurred during booking:", error);
+      // Handle error appropriately, e.g., show a message to the user
+    }
   };
 
   const isStep1Valid = formData.name && formData.email && formData.phone;
@@ -224,6 +244,8 @@ const dropdownOptions = {
   );
   const isStep7Valid = true; // Step 7 is optional, so always valid
   const isStep8Valid = true; // Step 8 is optional, so always valid
+
+  console.log(formData);
 
   return (
     <div className="min-h-screen bg-background">
