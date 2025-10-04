@@ -3,10 +3,6 @@ const Bartender = require('../models/bartender.model'); // To fetch name and ema
 
 const submitQuestionnaire = async (req, res) => {
     try {
-        console.log(req.headers);
-        console.log("--------------------------------");
-        console.log(req.body);
-        console.log("--------------------------------");
         const bartenderId = req.userId; // From authentication middleware
 
         // Fetch bartender's name and email
