@@ -22,6 +22,7 @@ const Landing = () => {
     e.preventDefault();
     if (loginForm.email && loginForm.password) {
       localStorage.setItem('bartender-email', loginForm.email);
+      localStorage.setItem('bartender-logged-in', 'true');
       setLoginOpen(false);
       toast({
         title: "Welcome back!",
@@ -36,8 +37,8 @@ const Landing = () => {
     if (registerForm.email && registerForm.username && registerForm.password) {
       localStorage.setItem('bartender-email', registerForm.email);
       localStorage.setItem('bartender-username', registerForm.username);
+      localStorage.setItem('bartender-logged-in', 'false');
       setRegisterOpen(false);
-      setLoginOpen(true);
       toast({
         title: "Registration successful!",
         description: "Please login with your credentials.",
@@ -60,7 +61,7 @@ const Landing = () => {
             build lasting client relationships, and take your bartending career to the next level.
           </p>
           <div className="flex gap-4 justify-center">
-            {localStorage.getItem('bartender-email') ? (
+            {localStorage.getItem('bartender-logged-in') === 'true' ? (
               <Button size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/questionnaire')}>
                 Start Your Journey
               </Button>
@@ -132,7 +133,7 @@ const Landing = () => {
               </Dialog>
             )}
 
-            {localStorage.getItem('bartender-email') ? (
+            {localStorage.getItem('bartender-logged-in') === 'true' ? (
               <Button size="lg" variant="outline" className="text-lg px-8 py-6" onClick={() => navigate('/dashboard')}>
                 I'm Already a Member
               </Button>
@@ -242,7 +243,7 @@ const Landing = () => {
             Join thousands of professional bartenders who trust PourConnect to grow their business.
           </p>
           <Button size="lg" onClick={() => {
-            if (localStorage.getItem('bartender-email')) {
+            if (localStorage.getItem('bartender-logged-in') === 'true') {
               navigate('/questionnaire');
             } else {
               setRegisterOpen(true);
