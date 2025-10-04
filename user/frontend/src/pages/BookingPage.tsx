@@ -75,6 +75,8 @@ const BookingPage = ({ onBack }: BookingPageProps) => {
     margaritaGlassesAvailable: false,
     margaritaGlassesQuantity: "",
     disposableOptionsAvailable: false,
+    iceBucketsQuantity: "",
+    coolersQuantity: "",
     cocktailShakerAvailable: false,
     barSpoonsAvailable: false,
     muddlerAvailable: false,
@@ -91,6 +93,61 @@ const BookingPage = ({ onBack }: BookingPageProps) => {
     drinkPreferences: [] as string[],
     serviceAddons: [] as string[],
     setupRequirements: [] as string[],
+    // Step 6 - Serving Accessories & Supplies
+    servingTraysAvailable: false,
+    servingTraysQuantity: "",
+    largeTraysAvailable: false,
+    smallCocktailTraysAvailable: false,
+    antiSlipTraysAvailable: false,
+    cocktailNapkinsAvailable: false,
+    coastersAvailable: false,
+    iceTongsAvailable: false,
+    servingSpoonsAvailable: false,
+    freshFruitsAvailable: false,
+    lemonsAvailable: false,
+    lemonsQuantity: "",
+    limesAvailable: false,
+    orangesAvailable: false,
+    orangesQuantity: "",
+    otherFruitsAvailable: false,
+    otherFruitsSpecify: "",
+    cherriesAvailable: false,
+    mintLeavesAvailable: false,
+    cucumberAvailable: false,
+    olivesAvailable: false,
+    softDrinksAvailable: false,
+    cokePepsiAvailable: false,
+    sprite7upAvailable: false,
+    sprite7upQuantity: "",
+    otherSodasAvailable: false,
+    otherSodasSpecify: "",
+    tonicWaterAvailable: false,
+    tonicWaterQuantity: "",
+    sodaWaterAvailable: false,
+    sodaWaterQuantity: "",
+    gingerAleAvailable: false,
+    gingerAleQuantity: "",
+    freshJuicesAvailable: false,
+    freshJuicesSpecify: "",
+    regularWaterAvailable: false,
+    regularWaterQuantity: "",
+    sparklingWaterAvailable: false,
+    sparklingWaterQuantity: "",
+    specificRequirementsAvailable: false,
+    specificRequirementsSpecify: "",
+    // Step 7 - Alcohol & Beverage Preferences
+    signatureCocktailDesired: false,
+    preferredCocktails: [] as string[],
+    customCocktailRequest: "",
+    sugarFreeOptionsRequired: false,
+    lowAlcoholMocktailOptions: false,
+    religiousCulturalRestrictions: "",
+    allergyConsiderations: "",
+    // Step 8 - Service Preferences & Special Requests
+    preferredAttire: [] as string[],
+    themedAttireSpecify: "",
+    languagePreferences: [] as string[],
+    regionalLanguageSpecify: "",
   });
 const navigate = useNavigate();
 
@@ -104,7 +161,10 @@ const dropdownOptions = {
     serviceAddons: ["Signature Cocktail Creation", "Drink Menu Consultation", "Garnish & Decoration", "Glass Rental"],
     setupRequirements: ["Full Bar Setup", "Mobile Bar Cart", "Equipment Rental", "Ice & Mixers Included"],
     preferredAtmosphere: ["Formal/Elegant", "Casual/Relaxed", "Party/Energetic", "Sophisticated/Upscale", "Traditional/Cultural", "Modern/Contemporary"],
-    preferredBarLocation: ["Indoor (Living Room)", "Indoor (Dining Area)", "Outdoor (Garden/Terrace)", "Poolside", "Entrance/Foyer Area", "Specific Location"]
+    preferredBarLocation: ["Indoor (Living Room)", "Indoor (Dining Area)", "Outdoor (Garden/Terrace)", "Poolside", "Entrance/Foyer Area", "Specific Location"],
+    preferredCocktails: ["Classic (Old Fashioned, Manhattan, Martini)", "Tropical (Mojito, Piña Colada, Daiquiri)", "Contemporary (Cosmopolitan, Moscow Mule)", "Indian Fusion (Masala Margarita, Curry Leaf Cocktail)"],
+    preferredAttire: ["Formal (Black Suit/Tie)", "Semi-formal (Black Shirt/Trousers)", "Themed Attire", "Casual Professional", "Traditional Indian Attire"],
+    languagePreferences: ["Marathi", "Hindi", "English", "Regional Language"]
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -124,8 +184,11 @@ const dropdownOptions = {
     }));
   };
 
-  const handleNextStep = () => {
-    if (currentStep < 5) {
+  const handleNextStep = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+    if (currentStep < 8) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -155,6 +218,12 @@ const dropdownOptions = {
     (formData.cocktailShakerAvailable || formData.barSpoonsAvailable || formData.muddlerAvailable || formData.jiggerAvailable || formData.strainerAvailable || formData.bottleOpenerAvailable || formData.corkscrewAvailable || formData.cuttingBoardAvailable || formData.sharpKnifeAvailable) &&
     (formData.refrigeratorAccess || formData.freezerAccess || formData.iceBucketsAvailable || formData.coolersAvailable)
   );
+  const isStep6Valid = (
+    (formData.servingTraysAvailable || formData.cocktailNapkinsAvailable || formData.coastersAvailable || formData.iceTongsAvailable || formData.servingSpoonsAvailable) &&
+    (formData.freshFruitsAvailable || formData.softDrinksAvailable)
+  );
+  const isStep7Valid = true; // Step 7 is optional, so always valid
+  const isStep8Valid = true; // Step 8 is optional, so always valid
 
   return (
     <div className="min-h-screen bg-background">
@@ -168,7 +237,7 @@ const dropdownOptions = {
             </p>
             <div className="flex justify-center mt-6">
               <div className="flex items-center space-x-4">
-                {[1, 2, 3, 4, 5].map((step) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((step) => (
                   <div key={step} className="flex items-center">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                       currentStep >= step 
@@ -177,7 +246,7 @@ const dropdownOptions = {
                     }`}>
                       {step}
                     </div>
-                    {step < 5 && (
+                    {step < 8 && (
                       <div className={`w-8 h-0.5 mx-2 ${
                         currentStep > step ? "bg-primary" : "bg-muted"
                       }`} />
@@ -193,6 +262,9 @@ const dropdownOptions = {
                 {currentStep === 3 && "Venue Information"}
                 {currentStep === 4 && "Bar Setup & Infrastructure"}
                 {currentStep === 5 && "Glassware & Equipment"}
+                {currentStep === 6 && "Serving Accessories & Supplies"}
+                {currentStep === 7 && "Alcohol & Beverage Preferences"}
+                {currentStep === 8 && "Service Preferences & Special Requests"}
               </span>
             </div>
           </div>
@@ -206,6 +278,9 @@ const dropdownOptions = {
                   {currentStep === 3 && "Venue Information"}
                   {currentStep === 4 && "Bar Setup & Infrastructure"}
                   {currentStep === 5 && "Glassware & Equipment"}
+                  {currentStep === 6 && "Serving Accessories & Supplies"}
+                  {currentStep === 7 && "Alcohol & Beverage Preferences"}
+                  {currentStep === 8 && "Service Preferences & Special Requests"}
                 </span>
               </CardTitle>
             </CardHeader>
@@ -495,17 +570,853 @@ const dropdownOptions = {
                     </div>
                   </div>
                 )}
+                {currentStep === 5 && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-medium">Glassware Requirements</h3>
+                    <div className="space-y-4">
+                      <Label>Available at Venue:</Label>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.wineGlassesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, wineGlassesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Wine Glasses</Label>
+                          {formData.wineGlassesAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.wineGlassesQuantity} 
+                              onChange={(e) => handleInputChange("wineGlassesQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.beerMugsAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, beerMugsAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Beer Mugs/Glasses</Label>
+                          {formData.beerMugsAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.beerMugsQuantity} 
+                              onChange={(e) => handleInputChange("beerMugsQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.whiskeyGlassesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, whiskeyGlassesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Whiskey Glasses/Tumblers</Label>
+                          {formData.whiskeyGlassesAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.whiskeyGlassesQuantity} 
+                              onChange={(e) => handleInputChange("whiskeyGlassesQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.shotGlassesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, shotGlassesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Shot Glasses —consult with bartender</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.champagneFlutesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, champagneFlutesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Champagne Flutes</Label>
+                          {formData.champagneFlutesAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.champagneFlutesQuantity} 
+                              onChange={(e) => handleInputChange("champagneFlutesQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.cocktailGlassesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, cocktailGlassesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Cocktail/Martini Glasses</Label>
+                          {formData.cocktailGlassesAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.cocktailGlassesQuantity} 
+                              onChange={(e) => handleInputChange("cocktailGlassesQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.highballGlassesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, highballGlassesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Highball Glasses</Label>
+                          {formData.highballGlassesAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.highballGlassesQuantity} 
+                              onChange={(e) => handleInputChange("highballGlassesQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.margaritaGlassesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, margaritaGlassesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Margarita Glasses</Label>
+                          {formData.margaritaGlassesAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.margaritaGlassesQuantity} 
+                              onChange={(e) => handleInputChange("margaritaGlassesQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.disposableOptionsAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, disposableOptionsAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Disposable/Plastic Options</Label>
+                        </div>
+                      </div>
+                    </div>
 
+                    <h3 className="text-lg font-medium">Bar Equipment & Tools</h3>
+                    <div className="space-y-4">
+                      <Label>Available at Venue:</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.cocktailShakerAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, cocktailShakerAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Cocktail Shaker</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.barSpoonsAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, barSpoonsAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Bar Spoons</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.muddlerAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, muddlerAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Muddler</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.jiggerAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, jiggerAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Jigger/Measuring Tools —consult with bartender</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.strainerAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, strainerAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Strainer</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.bottleOpenerAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, bottleOpenerAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Bottle Opener</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.corkscrewAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, corkscrewAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Corkscrew</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.cuttingBoardAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, cuttingBoardAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Cutting Board</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.sharpKnifeAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, sharpKnifeAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Sharp Knife</Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h3 className="text-lg font-medium">Ice & Cooling Equipment</h3>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Refrigerator Access</Label>
+                        <RadioGroup
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, refrigeratorAccess: value === "yes" }))}
+                          value={formData.refrigeratorAccess ? "yes" : "no"}
+                          className="flex space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="yes" id="refrigerator-yes" />
+                            <Label htmlFor="refrigerator-yes">Yes</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="no" id="refrigerator-no" />
+                            <Label htmlFor="refrigerator-no">No</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Freezer Access —consult with bartender</Label>
+                        <RadioGroup
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, freezerAccess: value === "yes" }))}
+                          value={formData.freezerAccess ? "yes" : "no"}
+                          className="flex space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="yes" id="freezer-yes" />
+                            <Label htmlFor="freezer-yes">Yes</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="no" id="freezer-no" />
+                            <Label htmlFor="freezer-no">No</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Ice Buckets Available</Label>
+                        <RadioGroup
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, iceBucketsAvailable: value === "yes" }))}
+                          value={formData.iceBucketsAvailable ? "yes" : "no"}
+                          className="flex space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="yes" id="ice-buckets-yes" />
+                            <Label htmlFor="ice-buckets-yes">Yes</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="no" id="ice-buckets-no" />
+                            <Label htmlFor="ice-buckets-no">No</Label>
+                          </div>
+                        </RadioGroup>
+                        {formData.iceBucketsAvailable && (
+                          <Input 
+                            placeholder="Quantity" 
+                            value={formData.iceBucketsQuantity || ""} 
+                            onChange={(e) => handleInputChange("iceBucketsQuantity", e.target.value)}
+                            className="w-24 mt-2"
+                          />
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Coolers/Ice Boxes</Label>
+                        <RadioGroup
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, coolersAvailable: value === "yes" }))}
+                          value={formData.coolersAvailable ? "yes" : "no"}
+                          className="flex space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="yes" id="coolers-yes" />
+                            <Label htmlFor="coolers-yes">Yes</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="no" id="coolers-no" />
+                            <Label htmlFor="coolers-no">No</Label>
+                          </div>
+                        </RadioGroup>
+                        {formData.coolersAvailable && (
+                          <Input 
+                            placeholder="Quantity" 
+                            value={formData.coolersQuantity || ""} 
+                            onChange={(e) => handleInputChange("coolersQuantity", e.target.value)}
+                            className="w-24 mt-2"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {currentStep === 6 && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-medium">Serving Equipment</h3>
+                    <div className="space-y-4">
+                      <Label>Available at Venue:</Label>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.servingTraysAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, servingTraysAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Serving Trays</Label>
+                          {formData.servingTraysAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.servingTraysQuantity} 
+                              onChange={(e) => handleInputChange("servingTraysQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.largeTraysAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, largeTraysAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Large Trays</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.smallCocktailTraysAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, smallCocktailTraysAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Small Cocktail Trays</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.antiSlipTraysAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, antiSlipTraysAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Anti-slip Trays —consult with bartender</Label>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Cocktail Napkins</Label>
+                          <RadioGroup
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, cocktailNapkinsAvailable: value === "yes" }))}
+                            value={formData.cocktailNapkinsAvailable ? "yes" : "no"}
+                            className="flex space-x-4"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="cocktail-napkins-yes" />
+                              <Label htmlFor="cocktail-napkins-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="cocktail-napkins-no" />
+                              <Label htmlFor="cocktail-napkins-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Coasters</Label>
+                          <RadioGroup
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, coastersAvailable: value === "yes" }))}
+                            value={formData.coastersAvailable ? "yes" : "no"}
+                            className="flex space-x-4"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="coasters-yes" />
+                              <Label htmlFor="coasters-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="coasters-no" />
+                              <Label htmlFor="coasters-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Ice Tongs</Label>
+                          <RadioGroup
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, iceTongsAvailable: value === "yes" }))}
+                            value={formData.iceTongsAvailable ? "yes" : "no"}
+                            className="flex space-x-4"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="ice-tongs-yes" />
+                              <Label htmlFor="ice-tongs-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="ice-tongs-no" />
+                              <Label htmlFor="ice-tongs-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Serving Spoons</Label>
+                          <RadioGroup
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, servingSpoonsAvailable: value === "yes" }))}
+                            value={formData.servingSpoonsAvailable ? "yes" : "no"}
+                            className="flex space-x-4"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="serving-spoons-yes" />
+                              <Label htmlFor="serving-spoons-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="serving-spoons-no" />
+                              <Label htmlFor="serving-spoons-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h3 className="text-lg font-medium">Fresh Ingredients & Garnishes</h3>
+                    <div className="space-y-4">
+                      <Label>Available at Venue:</Label>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.freshFruitsAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, freshFruitsAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Fresh Fruits:</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.lemonsAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, lemonsAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Lemons</Label>
+                          {formData.lemonsAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.lemonsQuantity} 
+                              onChange={(e) => handleInputChange("lemonsQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.limesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, limesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Limes —consult with bartender</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.orangesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, orangesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Oranges</Label>
+                          {formData.orangesAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.orangesQuantity} 
+                              onChange={(e) => handleInputChange("orangesQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.otherFruitsAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, otherFruitsAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Other:</Label>
+                          {formData.otherFruitsAvailable && (
+                            <Input 
+                              placeholder="Specify" 
+                              value={formData.otherFruitsSpecify} 
+                              onChange={(e) => handleInputChange("otherFruitsSpecify", e.target.value)}
+                              className="w-32 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.cherriesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, cherriesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Cherries</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.mintLeavesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, mintLeavesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Mint Leaves</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.cucumberAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, cucumberAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Cucumber</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.olivesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, olivesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Olives</Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h3 className="text-lg font-medium">Mixers & Non-Alcoholic Beverages</h3>
+                    <div className="space-y-4">
+                      <Label>Available at Venue:</Label>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.softDrinksAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, softDrinksAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Soft Drinks:</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.cokePepsiAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, cokePepsiAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Coke/Pepsi —consult with bartender</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.sprite7upAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, sprite7upAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Sprite/7Up</Label>
+                          {formData.sprite7upAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.sprite7upQuantity} 
+                              onChange={(e) => handleInputChange("sprite7upQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.otherSodasAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, otherSodasAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Other Sodas:</Label>
+                          {formData.otherSodasAvailable && (
+                            <Input 
+                              placeholder="Specify" 
+                              value={formData.otherSodasSpecify} 
+                              onChange={(e) => handleInputChange("otherSodasSpecify", e.target.value)}
+                              className="w-32 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.tonicWaterAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, tonicWaterAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Tonic Water</Label>
+                          {formData.tonicWaterAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.tonicWaterQuantity} 
+                              onChange={(e) => handleInputChange("tonicWaterQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.sodaWaterAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, sodaWaterAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Soda Water</Label>
+                          {formData.sodaWaterAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.sodaWaterQuantity} 
+                              onChange={(e) => handleInputChange("sodaWaterQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.gingerAleAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, gingerAleAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Ginger Ale</Label>
+                          {formData.gingerAleAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.gingerAleQuantity} 
+                              onChange={(e) => handleInputChange("gingerAleQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.freshJuicesAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, freshJuicesAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Fresh Juices:</Label>
+                          {formData.freshJuicesAvailable && (
+                            <Input 
+                              placeholder="Specify" 
+                              value={formData.freshJuicesSpecify} 
+                              onChange={(e) => handleInputChange("freshJuicesSpecify", e.target.value)}
+                              className="w-32 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.regularWaterAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, regularWaterAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Regular Water</Label>
+                          {formData.regularWaterAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.regularWaterQuantity} 
+                              onChange={(e) => handleInputChange("regularWaterQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Checkbox
+                            checked={formData.sparklingWaterAvailable}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, sparklingWaterAvailable: checked as boolean }))}
+                          />
+                          <Label className="text-sm font-normal">Sparkling Water</Label>
+                          {formData.sparklingWaterAvailable && (
+                            <Input 
+                              placeholder="Quantity" 
+                              value={formData.sparklingWaterQuantity} 
+                              onChange={(e) => handleInputChange("sparklingWaterQuantity", e.target.value)}
+                              className="w-24 ml-2"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={formData.specificRequirementsAvailable}
+                          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, specificRequirementsAvailable: checked as boolean }))}
+                        />
+                        <Label className="text-sm font-normal">Specific Requirements:</Label>
+                        {formData.specificRequirementsAvailable && (
+                          <Input 
+                            placeholder="Specify" 
+                            value={formData.specificRequirementsSpecify} 
+                            onChange={(e) => handleInputChange("specificRequirementsSpecify", e.target.value)}
+                            className="w-32 ml-2"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {currentStep === 7 && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-medium">Alcohol & Beverage Preferences</h3>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                      <div className="flex items-start space-x-2">
+                        <div className="text-blue-600 font-semibold text-sm">Important Notice:</div>
+                      </div>
+                      <p className="text-sm text-blue-800 mt-1 italic">
+                        As per our service model, customers are responsible for purchasing and providing all
+                        alcoholic beverages. Our bartenders provide professional service only.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Signature Cocktail Desired</Label>
+                        <RadioGroup
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, signatureCocktailDesired: value === "yes" }))}
+                          value={formData.signatureCocktailDesired ? "yes" : "no"}
+                          defaultValue="no"
+                          className="flex space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="yes" id="signature-cocktail-yes" />
+                            <Label htmlFor="signature-cocktail-yes">Yes</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="no" id="signature-cocktail-no" />
+                            <Label htmlFor="signature-cocktail-no">No</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Preferred Cocktails</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {checkboxOptions.preferredCocktails.map((option) => (
+                            <div key={option} className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={formData.preferredCocktails.includes(option)}
+                                onCheckedChange={(checked) => handleCheckboxChange("preferredCocktails", option, checked as boolean)}
+                              />
+                              <Label className="text-sm font-normal">{option}</Label>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={formData.customCocktailRequest !== ""}
+                            onCheckedChange={(checked) => {
+                              if (!checked) {
+                                setFormData(prev => ({ ...prev, customCocktailRequest: "" }));
+                              }
+                            }}
+                          />
+                          <Label className="text-sm font-normal">Custom Request:</Label>
+                          <Input 
+                            placeholder="Specify custom cocktail" 
+                            value={formData.customCocktailRequest} 
+                            onChange={(e) => handleInputChange("customCocktailRequest", e.target.value)}
+                            className="w-48 ml-2"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Sugar-free Options Required</Label>
+                        <RadioGroup
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, sugarFreeOptionsRequired: value === "yes" }))}
+                          value={formData.sugarFreeOptionsRequired ? "yes" : "no"}
+                          defaultValue="no"
+                          className="flex space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="yes" id="sugar-free-yes" />
+                            <Label htmlFor="sugar-free-yes">Yes</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="no" id="sugar-free-no" />
+                            <Label htmlFor="sugar-free-no">No</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Low-alcohol/Mocktail Options</Label>
+                        <RadioGroup
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, lowAlcoholMocktailOptions: value === "yes" }))}
+                          value={formData.lowAlcoholMocktailOptions ? "yes" : "no"}
+                          defaultValue="no"
+                          className="flex space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="yes" id="low-alcohol-yes" />
+                            <Label htmlFor="low-alcohol-yes">Yes</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="no" id="low-alcohol-no" />
+                            <Label htmlFor="low-alcohol-no">No</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Religious/Cultural Restrictions</Label>
+                        <Input 
+                          placeholder="Specify any religious or cultural restrictions" 
+                          value={formData.religiousCulturalRestrictions} 
+                          onChange={(e) => handleInputChange("religiousCulturalRestrictions", e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Allergy Considerations</Label>
+                        <Input 
+                          placeholder="Specify any allergy considerations" 
+                          value={formData.allergyConsiderations} 
+                          onChange={(e) => handleInputChange("allergyConsiderations", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {currentStep === 8 && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-medium">Bartender Presentation</h3>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Preferred Attire</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {checkboxOptions.preferredAttire.map((option) => (
+                            <div key={option} className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={formData.preferredAttire.includes(option)}
+                                onCheckedChange={(checked) => handleCheckboxChange("preferredAttire", option, checked as boolean)}
+                              />
+                              <Label className="text-sm font-normal">{option}</Label>
+                            </div>
+                          ))}
+                        </div>
+                        {formData.preferredAttire.includes("Themed Attire") && (
+                          <div className="flex items-center space-x-2 ml-6">
+                            <Label className="text-sm font-normal">Specify:</Label>
+                            <Input 
+                              placeholder="Specify themed attire" 
+                              value={formData.themedAttireSpecify} 
+                              onChange={(e) => handleInputChange("themedAttireSpecify", e.target.value)}
+                              className="w-48 ml-2"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <h3 className="text-lg font-medium">Special Requirements</h3>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Language Preferences</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {checkboxOptions.languagePreferences.map((option) => (
+                            <div key={option} className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={formData.languagePreferences.includes(option)}
+                                onCheckedChange={(checked) => handleCheckboxChange("languagePreferences", option, checked as boolean)}
+                              />
+                              <Label className="text-sm font-normal">{option}</Label>
+                            </div>
+                          ))}
+                        </div>
+                        {formData.languagePreferences.includes("Regional Language") && (
+                          <div className="flex items-center space-x-2 ml-6">
+                            <Label className="text-sm font-normal">Specify:</Label>
+                            <Input 
+                              placeholder="Specify regional language" 
+                              value={formData.regionalLanguageSpecify} 
+                              onChange={(e) => handleInputChange("regionalLanguageSpecify", e.target.value)}
+                              className="w-48 ml-2"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex justify-between pt-6">
                   <Button type="button" variant="outline" onClick={handlePrevStep} disabled={currentStep === 1}>Back</Button>
                   <Button
-                    type={currentStep === 5 ? "submit" : "button"}
+                    type={currentStep === 8 ? "submit" : "button"}
                     variant="hero"
-                    onClick={currentStep === 5 ? undefined : handleNextStep}
-                    disabled={(currentStep === 1 && !isStep1Valid) || (currentStep === 2 && !isStep2Valid) || (currentStep === 3 && !isStep3Valid) || (currentStep === 4 && !isStep4Valid) || (currentStep === 5 && !isStep5Valid)}
+                    onClick={currentStep === 8 ? handleSubmit : (e) => handleNextStep(e)}
+                    disabled={(currentStep === 1 && !isStep1Valid) || (currentStep === 2 && !isStep2Valid) || (currentStep === 3 && !isStep3Valid) || (currentStep === 4 && !isStep4Valid) || (currentStep === 5 && !isStep5Valid) || (currentStep === 6 && !isStep6Valid) || (currentStep === 7 && !isStep7Valid) || (currentStep === 8 && !isStep8Valid)}
                   >
-                    {currentStep === 4 ? "Find a Bartender" : "Next Step"}
+                    {currentStep === 8 ? "Find a Bartender" : "Next Step"}
                   </Button>
                 </div>
               </form>
