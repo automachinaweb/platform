@@ -1,267 +1,97 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Search, Send, Phone, Video, MoreVertical, MessageCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+// filepath: c:\Users\2004s\OneDrive\Desktop\internship\updated_1\platform\user\frontend\src\pages\Chat.tsx
+import React, { useState, useEffect, useRef } from 'react';
+import io, { Socket } from 'socket.io-client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface Chat {
-  id: string;
-  name: string;
-  lastMessage: string;
-  time: string;
-  unread: number;
-  avatar: string;
-  online: boolean;
-}
-
-interface Message {
-  id: string;
-  sender: "me" | "client";
-  content: string;
+// Define the message structure
+interface MessageData {
+  room: string;
+  author: string;
+  message: string;
   time: string;
 }
+
+// Connect to the chat server
+const CHAT_SERVER_URL = import.meta.env.VITE_CHAT_URL || 'http://localhost:4000';
+const socket: Socket = io(CHAT_SERVER_URL);
 
 const Chat = () => {
-  const [selectedChat, setSelectedChat] = useState<string | null>("1");
-  const [newMessage, setNewMessage] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [messageList, setMessageList] = useState<MessageData[]>([]);
+  
+  // Example: room ID could be based on user and bartender IDs
+  const chatRoom = "user1_bartender1"; 
+  const authorName = "Bartender"; // This would be dynamic in a real app
 
-  // Mock chat data
-  const chats: Chat[] = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      lastMessage: "Thanks for the quote! When are you available next weekend?",
-      time: "2m ago",
-      unread: 2,
-      avatar: "SJ",
-      online: true
-    },
-    {
-      id: "2", 
-      name: "Michael Chen",
-      lastMessage: "Perfect! I'll send you the event details.",
-      time: "1h ago",
-      unread: 0,
-      avatar: "MC",
-      online: false
-    },
-    {
-      id: "3",
-      name: "Emma Davis",
-      lastMessage: "Looking for a bartender for our wedding reception",
-      time: "3h ago",
-      unread: 1,
-      avatar: "ED",
-      online: true
-    }
-  ];
+  const sendMessage = async () => {
+    if (currentMessage !== '') {
+      const messageData: MessageData = {
+        room: chatRoom,
+        author: authorName,
+        message: currentMessage,
+        time: new Date(Date.now()).toLocaleTimeString(),
+      };
 
-  // Mock messages for selected chat
-  const messages: Message[] = [
-    {
-      id: "1",
-      sender: "client",
-      content: "Hi! I'm planning a corporate event for 50 people next Friday. Are you available?",
-      time: "10:30 AM"
-    },
-    {
-      id: "2",
-      sender: "me",
-      content: "Hello! Yes, I'm available next Friday. That sounds like a great event. What type of drinks are you thinking?",
-      time: "10:32 AM"
-    },
-    {
-      id: "3",
-      sender: "client",
-      content: "We'd like a mix of cocktails and wine service. The event is from 6-10 PM. What would your rate be?",
-      time: "10:35 AM"
-    },
-    {
-      id: "4",
-      sender: "me",
-      content: "For a 4-hour corporate event with cocktail and wine service, my rate would be $75/hour plus ingredients. I can provide a full bar setup and professional service.",
-      time: "10:40 AM"
-    },
-    {
-      id: "5",
-      sender: "client",
-      content: "Thanks for the quote! When are you available next weekend?",
-      time: "2m ago"
-    }
-  ];
-
-  const filteredChats = chats.filter(chat =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const selectedChatData = chats.find(chat => chat.id === selectedChat);
-
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // In a real app, this would send the message to the backend
-      console.log("Sending message:", newMessage);
-      setNewMessage("");
+      await socket.emit('send_message', messageData);
+      setMessageList((list) => [...list, messageData]); // Show your own message
+      setCurrentMessage('');
     }
   };
 
+  useEffect(() => {
+    // Join the chat room once the component mounts
+    socket.emit('join_room', { room: chatRoom });
+
+    // Listen for incoming messages
+    const messageListener = (data: MessageData) => {
+      setMessageList((list) => [...list, data]);
+    };
+    socket.on('receive_message', messageListener);
+
+    // Cleanup on component unmount
+    return () => {
+      socket.off('receive_message', messageListener);
+    };
+  }, []);
+
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [messageList]);
+
   return (
-    <div className="h-[calc(100vh-80px)] flex">
-      {/* Chat List Sidebar */}
-      <div className="w-80 border-r bg-card flex flex-col">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl">Messages</CardTitle>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search conversations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Chat with Bartender</CardTitle>
         </CardHeader>
-        
-        <CardContent className="flex-1 overflow-y-auto p-0">
-          <div className="space-y-1">
-            {filteredChats.map((chat) => (
-              <div
-                key={chat.id}
-                className={cn(
-                  "p-4 cursor-pointer hover:bg-muted/50 border-b transition-colors",
-                  selectedChat === chat.id && "bg-muted"
-                )}
-                onClick={() => setSelectedChat(chat.id)}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <Avatar>
-                      <AvatarFallback>{chat.avatar}</AvatarFallback>
-                    </Avatar>
-                    {chat.online && (
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium truncate">{chat.name}</h4>
-                      <span className="text-xs text-muted-foreground">{chat.time}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate mt-1">
-                      {chat.lastMessage}
-                    </p>
-                  </div>
-                  
-                  {chat.unread > 0 && (
-                    <Badge variant="default" className="rounded-full min-w-[20px] h-5 text-xs">
-                      {chat.unread}
-                    </Badge>
-                  )}
-                </div>
+        <CardContent className="h-96 overflow-y-auto p-4 space-y-4">
+          {messageList.map((msg, index) => (
+            <div key={index} className={`flex ${msg.author === authorName ? 'justify-end' : 'justify-start'}`}>
+              <div className={`p-3 rounded-lg ${msg.author === authorName ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
+                <p className="text-sm">{msg.message}</p>
+                <p className="text-xs text-right mt-1">{msg.author} @ {msg.time}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
         </CardContent>
-      </div>
-
-      {/* Chat Window */}
-      <div className="flex-1 flex flex-col">
-        {selectedChatData ? (
-          <>
-            {/* Chat Header */}
-            <div className="border-b bg-card p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <Avatar>
-                      <AvatarFallback>{selectedChatData.avatar}</AvatarFallback>
-                    </Avatar>
-                    {selectedChatData.online && (
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{selectedChatData.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedChatData.online ? "Online" : "Last seen 2h ago"}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon">
-                    <Phone className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <Video className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex",
-                    message.sender === "me" ? "justify-end" : "justify-start"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "max-w-[70%] px-4 py-2 rounded-lg",
-                      message.sender === "me"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-chat-bubble text-chat-bubble-foreground"
-                    )}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                    <p className={cn(
-                      "text-xs mt-1",
-                      message.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"
-                    )}>
-                      {message.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Message Input */}
-            <div className="border-t bg-card p-4">
-              <div className="flex items-center gap-2">
-                <Input
-                  placeholder="Type your message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                  className="flex-1"
-                />
-                <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center bg-muted/20">
-            <div className="text-center">
-              <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No chat selected</h3>
-              <p className="text-muted-foreground">Select a conversation to start chatting with clients</p>
-            </div>
-          </div>
-        )}
-      </div>
+        <CardFooter>
+          <Input
+            type="text"
+            value={currentMessage}
+            placeholder="Type a message..."
+            onChange={(e) => setCurrentMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            className="mr-2"
+          />
+          <Button onClick={sendMessage}>Send</Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

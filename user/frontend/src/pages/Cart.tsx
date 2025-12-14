@@ -1,258 +1,99 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// filepath: c:\Users\2004s\OneDrive\Desktop\internship\updated_1\platform\user\frontend\src\pages\Chat.tsx
+import React, { useState, useEffect, useRef } from 'react';
+import io, { Socket } from 'socket.io-client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ShoppingCart, Plus, CreditCard, Calendar, MapPin, Clock, User, Trash2 } from "lucide-react";
-
-interface CartItem {
-  id: string;
-  bartenderName: string;
-  bartenderAvatar: string;
-  eventType: string;
-  date: string;
+// Define the message structure
+interface MessageData {
+  room: string;
+  author: string;
+  message: string;
   time: string;
-  duration: string;
-  guests: string;
-  price: number;
-  status: "accepted" | "pending";
 }
 
-const Cart = () => {
-  const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: "1",
-      bartenderName: "Marcus Rodriguez",
-      bartenderAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      eventType: "Birthday Party",
-      date: "2024-02-15",
-      time: "7:00 PM",
-      duration: "4 hours",
-      guests: "25 guests",
-      price: 300,
-      status: "accepted"
-    },
-    {
-      id: "2",
-      bartenderName: "Isabella Chen",
-      bartenderAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      eventType: "Corporate Event",
-      date: "2024-02-18",
-      time: "6:00 PM",
-      duration: "3 hours",
-      guests: "50 guests",
-      price: 225,
-      status: "accepted"
+// Connect to the chat server
+const CHAT_SERVER_URL = import.meta.env.VITE_CHAT_URL || 'http://localhost:4000';
+const socket: Socket = io(CHAT_SERVER_URL);
+
+const Chat = () => {
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [messageList, setMessageList] = useState<MessageData[]>([]);
+  
+  // Example: room ID could be based on user and bartender IDs
+  const chatRoom = "user1_bartender1"; 
+  const authorName = "User"; // This would be dynamic in a real app
+
+  const sendMessage = async () => {
+    if (currentMessage !== '') {
+      const messageData: MessageData = {
+        room: chatRoom,
+        author: authorName,
+        message: currentMessage,
+        time: new Date(Date.now()).toLocaleTimeString(),
+      };
+
+      await socket.emit('send_message', messageData);
+      setMessageList((list) => [...list, messageData]); // Show your own message
+      setCurrentMessage('');
     }
-  ]);
-
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-
-  const removeItem = (id: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
   };
 
-  const totalAmount = cartItems.reduce((total, item) => total + item.price, 0);
+  useEffect(() => {
+    // Join the chat room once the component mounts
+    socket.emit('join_room', { room: chatRoom });
 
-  const handlePayment = () => {
-    // TODO: Integrate with payment processor (Stripe/Razorpay)
-    console.log("Processing payment for:", cartItems);
-    setShowPaymentModal(true);
+    // Listen for incoming messages
+    const messageListener = (data: MessageData) => {
+      setMessageList((list) => [...list, data]);
+    };
+    socket.on('receive_message', messageListener);
+
+    // Cleanup on component unmount
+    return () => {
+      socket.off('receive_message', messageListener);
+    };
+  }, []);
+
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const simulatePayment = () => {
-    // Simulate payment processing
-    setTimeout(() => {
-      setShowPaymentModal(false);
-      // Clear cart and show success
-      setCartItems([]);
-      alert("Payment successful! Your bookings have been confirmed.");
-    }, 2000);
-  };
+  useEffect(scrollToBottom, [messageList]);
 
   return (
-    <div className="min-h-screen bg-background">
-      
-      
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center space-x-3 mb-8">
-            <ShoppingCart className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl md:text-4xl font-bold">Your Cart</h1>
-            {cartItems.length > 0 && (
-              <Badge variant="secondary" className="text-lg px-3 py-1">
-                {cartItems.length} item{cartItems.length !== 1 ? 's' : ''}
-              </Badge>
-            )}
-          </div>
-
-          {cartItems.length === 0 ? (
-            <Card className="shadow-card text-center py-12">
-              <CardContent>
-                <ShoppingCart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Your cart is empty</h3>
-                <p className="text-muted-foreground mb-6">
-                  Start browsing our talented bartenders to add services to your cart
-                </p>
-                <Button
-                  variant="hero"
-                  size="lg"
-                  onClick={() => navigate("/bartenders")}
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Start Booking
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-6">
-              {/* Cart Items */}
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <Card key={item.id} className="shadow-card">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
-                        <div className="flex items-start space-x-4">
-                          <img
-                            src={item.bartenderAvatar}
-                            alt={item.bartenderName}
-                            className="w-16 h-16 rounded-full object-cover"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h3 className="text-lg font-semibold">{item.bartenderName}</h3>
-                              <Badge 
-                                variant={item.status === "accepted" ? "default" : "secondary"}
-                                className="capitalize"
-                              >
-                                {item.status}
-                              </Badge>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-muted-foreground">
-                              <div className="flex items-center">
-                                <Calendar className="w-4 h-4 mr-2" />
-                                {item.eventType}
-                              </div>
-                              <div className="flex items-center">
-                                <Clock className="w-4 h-4 mr-2" />
-                                {item.date} at {item.time}
-                              </div>
-                              <div className="flex items-center">
-                                <MapPin className="w-4 h-4 mr-2" />
-                                {item.duration}
-                              </div>
-                              <div className="flex items-center">
-                                <User className="w-4 h-4 mr-2" />
-                                {item.guests}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between lg:flex-col lg:items-end space-y-2">
-                          <div className="text-2xl font-bold text-primary">
-                            ${item.price}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeItem(item.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Remove
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Chat with Bartender</CardTitle>
+        </CardHeader>
+        <CardContent className="h-96 overflow-y-auto p-4 space-y-4">
+          {messageList.map((msg, index) => (
+            <div key={index} className={`flex ${msg.author === authorName ? 'justify-end' : 'justify-start'}`}>
+              <div className={`p-3 rounded-lg ${msg.author === authorName ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
+                <p className="text-sm">{msg.message}</p>
+                <p className="text-xs text-right mt-1">{msg.author} @ {msg.time}</p>
               </div>
-
-              {/* Summary Card */}
-              <Card className="shadow-elegant border-primary/20">
-                <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between text-lg">
-                      <span>Subtotal ({cartItems.length} items):</span>
-                      <span className="font-semibold">${totalAmount}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>Service Fee:</span>
-                      <span>$25</span>
-                    </div>
-                    <div className="border-t pt-4">
-                      <div className="flex justify-between text-xl font-bold">
-                        <span>Total:</span>
-                        <span className="text-primary">${totalAmount + 25}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="flex-1"
-                        onClick={() => navigate("/bartenders")}
-                      >
-                        <Plus className="w-5 h-5 mr-2" />
-                        Add More Services
-                      </Button>
-                      <Button
-                        variant="hero"
-                        size="lg"
-                        className="flex-1"
-                        onClick={handlePayment}
-                      >
-                        <CreditCard className="w-5 h-5 mr-2" />
-                        Proceed to Payment
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Payment Modal */}
-      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Payment Processing</DialogTitle>
-          </DialogHeader>
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <CreditCard className="w-8 h-8 text-primary-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Secure Payment</h3>
-            <p className="text-muted-foreground mb-6">
-              Total Amount: <span className="font-bold text-primary">${totalAmount + 25}</span>
-            </p>
-            <Button
-              variant="hero"
-              size="lg"
-              onClick={simulatePayment}
-              className="w-full"
-            >
-              Complete Payment
-            </Button>
-            <p className="text-xs text-muted-foreground mt-4">
-              This is a demo. No actual payment will be processed.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
+          ))}
+          <div ref={messagesEndRef} />
+        </CardContent>
+        <CardFooter>
+          <Input
+            type="text"
+            value={currentMessage}
+            placeholder="Type a message..."
+            onChange={(e) => setCurrentMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            className="mr-2"
+          />
+          <Button onClick={sendMessage}>Send</Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
 
-export default Cart;
+export default Chat;

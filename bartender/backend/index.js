@@ -18,6 +18,11 @@ app.use(express.json());
 const emptyStringsToNull = require('./middleware/emptyStringsToNull.middleware');
 app.use(emptyStringsToNull);
 
+app.get('/', (req, res) => {
+    res.send('Bartender Backend is running!');
+});
+
+
 // Routes
 app.use('/bartender/auth', authRoutes);
 app.use('/bartender/questionnaire', questionnaireRoutes);
