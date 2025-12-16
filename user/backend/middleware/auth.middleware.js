@@ -8,7 +8,7 @@ const verifyToken = (req, res, next) => {
     }
 
     try {
-        const verified = jwt.verify(token, 'your_jwt_secret'); // Replace with actual secret in env
+        const verified = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
         req.user = verified;
         next();
     } catch (error) {

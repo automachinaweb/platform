@@ -1,36 +1,81 @@
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Clock, Award, MessageCircle, User } from "lucide-react";
-import bartendersData from "@/data/bartenders.json";
+import {
+  Star,
+  MapPin,
+  Clock,
+  Award,
+  MessageCircle,
+  User,
+  Loader2,
+} from "lucide-react";
+// import bartendersData from "@/data/bartenders.json"; // Removed local data
+
+interface Bartender {
+  id: string | number;
+  name: string;
+  avatar: string;
+  rating: number;
+  reviews: number;
+  verified: boolean;
+  experience: string;
+  location: string;
+  availability: string[];
+  specialties: string[];
+  price: string;
+}
 
 const BartenderSuggestions = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const bookingData = location.state?.bookingData;
+  const [bartenders, setBartenders] = useState<Bartender[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleViewProfile = (bartenderId: string) => {
+  useEffect(() => {
+    const fetchBartenders = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/user/bartenders");
+        if (response.ok) {
+          const data = await response.json();
+          setBartenders(data);
+        } else {
+          console.error("Failed to fetch bartenders");
+        }
+      } catch (error) {
+        console.error("Error fetching bartenders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBartenders();
+  }, []);
+
+  const handleViewProfile = (bartenderId: string | number) => {
     navigate(`/bartender/${bartenderId}`, { state: { bookingData } });
   };
 
-  const handleStartChat = (bartenderId: string) => {
+  const handleStartChat = (bartenderId: string | number) => {
     navigate(`/chat/${bartenderId}`, { state: { bookingData } });
   };
 
   return (
     <div className="min-h-screen bg-background">
-      
-      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Perfect Matches for Your Event</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">
+              Perfect Matches for Your Event
+            </h1>
             <p className="text-lg text-muted-foreground mb-6">
               Based on your preferences, here are our top recommended bartenders
             </p>
-            
+
             {bookingData && (
               <div className="inline-flex items-center space-x-4 bg-muted/50 rounded-full px-6 py-3 mb-8">
                 <Badge variant="outline">{bookingData.eventType}</Badge>
@@ -40,93 +85,120 @@ const BartenderSuggestions = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {bartendersData.map((bartender) => (
-              <Card key={bartender.id} className="shadow-card hover:shadow-elegant transition-all duration-300 overflow-hidden">
-                <CardHeader className="pb-4">
-                  <div className="relative">
-                    <img
-                      src={bartender.avatar}
-                      alt={bartender.name}
-                      className="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-4 border-primary/10"
-                    />
-                    {bartender.verified && (
-                      <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-2">
-                        <Badge className="bg-accent text-accent-foreground">
-                          <Award className="w-3 h-3 mr-1" />
-                          Verified
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="text-center">
-                    <h3 className="font-bold text-lg mb-1">{bartender.name}</h3>
-                    <div className="flex items-center justify-center space-x-1 mb-2">
-                      <Star className="w-4 h-4 text-accent fill-current" />
-                      <span className="font-semibold">{bartender.rating}</span>
-                      <span className="text-sm text-muted-foreground">({bartender.reviews})</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">{bartender.experience} experience</p>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="pt-0">
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {bartender.location}
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 mr-2" />
-                      Available: {bartender.availability.join(", ")}
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <p className="text-sm text-muted-foreground mb-2">Specialties:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {bartender.specialties.slice(0, 2).map((specialty, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {specialty}
-                        </Badge>
-                      ))}
-                      {bartender.specialties.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{bartender.specialties.length - 2} more
-                        </Badge>
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {bartenders.map((bartender) => (
+                <Card
+                  key={bartender.id}
+                  className="shadow-card hover:shadow-elegant transition-all duration-300 overflow-hidden"
+                >
+                  <CardHeader className="pb-4">
+                    <div className="relative">
+                      <img
+                        src={bartender.avatar}
+                        alt={bartender.name}
+                        className="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-4 border-primary/10"
+                      />
+                      {bartender.verified && (
+                        <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-2">
+                          <Badge className="bg-accent text-accent-foreground">
+                            <Award className="w-3 h-3 mr-1" />
+                            Verified
+                          </Badge>
+                        </div>
                       )}
                     </div>
-                  </div>
 
-                  <div className="text-center mb-6">
-                    <span className="text-2xl font-bold text-primary">{bartender.price}</span>
-                  </div>
+                    <div className="text-center">
+                      <h3 className="font-bold text-lg mb-1">
+                        {bartender.name}
+                      </h3>
+                      <div className="flex items-center justify-center space-x-1 mb-2">
+                        <Star className="w-4 h-4 text-accent fill-current" />
+                        <span className="font-semibold">
+                          {bartender.rating}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          ({bartender.reviews})
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {bartender.experience} experience
+                      </p>
+                    </div>
+                  </CardHeader>
 
-                  <div className="space-y-2">
-                    <Button
-                      variant="hero"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => handleViewProfile(bartender.id)}
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      View Profile
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => handleStartChat(bartender.id)}
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Start Chat
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        {bartender.location}
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4 mr-2" />
+                        Available: {bartender.availability.join(", ")}
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Specialties:
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {bartender.specialties
+                          .slice(0, 2)
+                          .map((specialty, index) => (
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {specialty}
+                            </Badge>
+                          ))}
+                        {bartender.specialties.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{bartender.specialties.length - 2} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-center mb-6">
+                      <span className="text-2xl font-bold text-primary">
+                        {bartender.price}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Button
+                        variant="hero"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => handleViewProfile(bartender.id)}
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        View Profile
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => handleStartChat(bartender.id)}
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Start Chat
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-12">
             <Button

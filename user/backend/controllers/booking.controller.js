@@ -132,6 +132,7 @@ exports.createBooking = async (req, res) => {
 
         // A new booking is created with the data from the request body.
         const savedBooking = await Booking.create({
+            userId: req.user.userId,
             name,
             email,
             phone,
@@ -291,6 +292,43 @@ exports.getBookingById = async (req, res) => {
         res.status(200).json(booking);
     } catch (error) {
         // If there is an error, a 500 status code is sent back with an error message.
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// NEW: Initiate a Booking Request to a specific Bartender
+exports.initiateRequest = async (req, res) => {
+    try {
+        const { bookingId, bartenderId, offeredAmount } = req.body;
+        
+        // 1. Fetch the original Booking details
+        const originalBooking = await Booking.findByPk(bookingId);
+        if (!originalBooking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        // 2. Create the Request
+        // Note: Using the shared `booking_requests` table
+        const BookingRequest = require('../models/bookingRequest.model');
+        
+        const newRequest = await BookingRequest.create({
+            userId: req.user.userId,
+            bartenderId,
+            originalBookingId: bookingId,
+            eventType: originalBooking.eventType,
+            eventDate: originalBooking.eventDate,
+            startTime: originalBooking.eventStartTime,
+            endTime: originalBooking.eventEndTime,
+            location: `${originalBooking.city}, ${originalBooking.state}`, // Construct location
+            guestCount: originalBooking.totalGuests,
+            offeredAmount: offeredAmount || 150.00, // Default or mock reasoning
+            status: 'PENDING'
+        });
+
+        res.status(201).json({ message: "Request sent successfully", request: newRequest });
+
+    } catch (error) {
+        console.error("Error initiating request:", error);
         res.status(500).json({ message: error.message });
     }
 };

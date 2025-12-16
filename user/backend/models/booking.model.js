@@ -126,6 +126,7 @@ const Booking = sequelize.define('Booking', {
     themedAttireSpecify: { type: DataTypes.STRING },
     languagePreferences: { type: DataTypes.JSONB },
     regionalLanguageSpecify: { type: DataTypes.STRING },
+    userId: { type: DataTypes.INTEGER, allowNull: true }, // Changed to true to handle existing rows
 }, { 
     timestamps: true,
     tableName: 'bookings'
