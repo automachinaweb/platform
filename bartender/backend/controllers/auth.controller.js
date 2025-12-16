@@ -85,6 +85,7 @@ const login = async (req, res) => {
             error: error.message
         });
     }
+    
 };
 
 module.exports = { signup, login };

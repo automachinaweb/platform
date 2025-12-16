@@ -3,7 +3,7 @@ const Bartender = require('../models/bartender.model'); // To fetch name and ema
 
 const submitQuestionnaire = async (req, res) => {
     try {
-        const bartenderId = req.userId; // From authentication middleware
+        const bartenderId = req.user.userId; // From authentication middleware
 
         // Fetch bartender's name and email
         const bartender = await Bartender.findByPk(bartenderId);
@@ -320,4 +320,28 @@ const submitQuestionnaire = async (req, res) => {
     }
 };
 
-module.exports = { submitQuestionnaire };
+// Get existing questionnaire
+const getQuestionnaire = async (req, res) => {
+    try {
+        const bartenderId = req.user.userId;
+        const bartender = await Bartender.findByPk(bartenderId);
+        
+        if (!bartender) {
+            return res.status(404).json({ message: 'Bartender not found' });
+        }
+
+        const questionnaire = await Questionnaire.findOne({ where: { email: bartender.email } });
+        if (!questionnaire) {
+             // Return empty or partial if not filled yet, but 200 OK so frontend handles empty form
+             return res.status(200).json(null);
+        }
+
+        res.json(questionnaire);
+
+    } catch (error) {
+        console.error('Error fetching questionnaire:', error);
+        res.status(500).json({ message: 'Error fetching questionnaire', error: error.message });
+    }
+};
+
+module.exports = { submitQuestionnaire, getQuestionnaire };

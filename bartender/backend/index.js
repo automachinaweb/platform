@@ -7,8 +7,10 @@ const bartenderRoutes = require('./routes/bartender.routes');
 const sequelize = require('./db');
 
 // Import models
+// Import models
 const Bartender = require('./models/bartender.model');
 const Questionnaire = require('./models/questionnaire.model');
+const BookingRequest = require('./models/bookingRequest.model');
 
 const app = express();
 
@@ -26,11 +28,17 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/bartender/auth', authRoutes);
 app.use('/bartender/questionnaire', questionnaireRoutes);
+app.use('/bartender/bookings', require('./routes/booking.routes'));
 app.use('/bartender', bartenderRoutes);
+
 
 // Define associations
 Bartender.hasOne(Questionnaire, { foreignKey: 'email', sourceKey: 'email', as: 'questionnaireData' });
 Questionnaire.belongsTo(Bartender, { foreignKey: 'email', targetKey: 'email' });
+
+Bartender.hasMany(BookingRequest, { foreignKey: 'bartenderId' });
+BookingRequest.belongsTo(Bartender, { foreignKey: 'bartenderId' });
+
 
 // Test the database connection
 sequelize.authenticate()

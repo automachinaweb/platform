@@ -12,8 +12,8 @@ const authenticateToken = (req, res, next) => {
         if (err) {
             return res.status(403).json({ message: 'Invalid or expired token' });
         }
-        req.userId = user.userId; // Attach user ID from token to request
-        console.log('Auth Middleware: userId from token:', req.userId); // Debugging line
+        req.user = user; // Attach full user payload to request
+        console.log('Auth Middleware: Appended user to req:', req.user); // Debugging line
         next();
     });
 };
