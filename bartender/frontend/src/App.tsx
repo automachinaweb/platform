@@ -23,8 +23,15 @@ const App = () => (
             <Route index element={<Landing />} />
             <Route path="questionnaire" element={<Questionnaire />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="chat" element={<Chat />} />
-            <Route path="reviews" element={<div className="p-8"><h1>Reviews Page</h1></div>} />
+            <Route path="chat/:id" element={<Chat />} />
+            <Route
+              path="reviews"
+              element={
+                <div className="p-8">
+                  <h1>Reviews Page</h1>
+                </div>
+              }
+            />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

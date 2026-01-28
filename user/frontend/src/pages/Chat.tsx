@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "react-router-dom";
+import io, { Socket } from "socket.io-client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Send, Phone, Video, MoreVertical, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import bartendersData from "@/data/bartenders.json";
+// Remove: import bartendersData from "@/data/bartenders.json";
+
+// Connect to Socket (User Backend)
+const socket: Socket = io("http://localhost:3000");
 
 interface Message {
   id: string;
@@ -23,53 +27,107 @@ const Chat = () => {
   const location = useLocation();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   const bookingData = location.state?.bookingData;
   const autoMessage = location.state?.autoMessage;
-  
-  const bartender = bartendersData.find(b => b.id === bartenderId);
+
+  // Use booking ID from state, or default to 1 for demo
+  const bookingId = bookingData?.id || "1";
+  // User ID should come from Auth Content, defaulting to 1 for demo
+  const userId = 1;
+
+  // State for Bartender Data
+  const [bartender, setBartender] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
 
-  // Load chat history from localStorage
+  // 1. Fetch Bartender Details
   useEffect(() => {
-    const chatKey = `chat_${bartenderId}`;
-    const savedMessages = localStorage.getItem(chatKey);
-    if (savedMessages) {
-      const parsed = JSON.parse(savedMessages).map((msg: any) => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp)
-      }));
-      setMessages(parsed);
-    } else {
-      // Initial greeting from bartender
-      const initialMessage: Message = {
-        id: "1",
-        senderId: bartenderId!,
-        senderName: bartender?.name || "Bartender",
-        content: `Hi! I'm ${bartender?.name}. I'm excited to learn about your event and see how I can make it special. What can I help you with?`,
-        timestamp: new Date(),
-        type: "text"
+    const fetchBartender = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/user/bartenders/${bartenderId}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setBartender(data);
+        }
+      } catch (e) {
+        console.error("Failed to fetch bartender details");
+      }
+    };
+    if (bartenderId) fetchBartender();
+  }, [bartenderId]);
+
+  // 2. Load chat history from Backend
+  useEffect(() => {
+    if (!bookingId) return;
+
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/user/bookings/${bookingId}/messages`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const history = data.map((msg: any) => ({
+            id: msg.id.toString(),
+            senderId:
+              msg.senderType === "USER" ? "user" : msg.senderId.toString(),
+            senderName:
+              msg.senderType === "USER"
+                ? "You"
+                : bartender?.name || "Bartender",
+            content: msg.content,
+            timestamp: new Date(msg.createdAt),
+            type: "text",
+          }));
+          setMessages(history);
+        }
+      } catch (e) {
+        console.error("Failed to load history", e);
+      }
+    };
+    fetchHistory();
+
+    // Join Room
+    socket.emit("join_chat", { bookingId: bookingId });
+
+    // Listen for messages
+    const handleReceive = (data: any) => {
+      console.log("Socket received:", data);
+
+      // Ignore own messages (optimistically added)
+      if (data.senderType === "USER") return;
+
+      const newMsg: Message = {
+        id: Date.now().toString(), // Temp ID
+        senderId:
+          data.senderType === "USER" ? "user" : data.senderId.toString(),
+        senderName:
+          data.senderType === "USER" ? "You" : bartender?.name || "Bartender",
+        content: data.content,
+        timestamp: new Date(data.createdAt || Date.now()),
+        type: "text",
       };
-      setMessages([initialMessage]);
-    }
+      // Avoid duplicate if we optimistic updated
+      setMessages((prev) => {
+        // Simple approach: just append. In prod, check IDs.
+        return [...prev, newMsg];
+      });
+    };
+    socket.on("receive_message", handleReceive);
 
-    // Add auto message if provided
-    if (autoMessage) {
-      setTimeout(() => {
-        sendMessage(autoMessage);
-      }, 1000);
-    }
-  }, [bartenderId, bartender?.name, autoMessage]);
-
-  // Save messages to localStorage
-  useEffect(() => {
-    if (messages.length > 0) {
-      const chatKey = `chat_${bartenderId}`;
-      localStorage.setItem(chatKey, JSON.stringify(messages));
-    }
-  }, [messages, bartenderId]);
+    return () => {
+      socket.off("receive_message", handleReceive);
+    };
+  }, [bookingId, bartender?.name]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -84,42 +142,31 @@ const Chat = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const sendMessage = (content: string = newMessage) => {
+  const sendMessage = async (content: string = newMessage) => {
     if (!content.trim()) return;
 
-    const message: Message = {
+    const msgPayload = {
+      bookingId: bookingId,
+      content: content.trim(),
+      senderId: userId,
+      senderType: "USER",
+    };
+
+    // Emit to Socket
+    await socket.emit("send_message", msgPayload);
+
+    // OPTIMISTIC UPDATE: Show immediately
+    const tempMsg: Message = {
       id: Date.now().toString(),
       senderId: "user",
       senderName: "You",
       content: content.trim(),
       timestamp: new Date(),
-      type: "text"
+      type: "text",
     };
+    setMessages((prev) => [...prev, tempMsg]);
 
-    setMessages(prev => [...prev, message]);
     setNewMessage("");
-
-    // Simulate bartender response
-    setTimeout(() => {
-      const responses = [
-        "That sounds great! I'd love to help with your event.",
-        "I have experience with that type of event. Let me know the details!",
-        "Perfect! I'm available for those dates. When would you like to finalize the booking?",
-        "I can definitely accommodate those requirements. Let's discuss the details!",
-        "Sounds like an exciting event! I'm looking forward to making it memorable."
-      ];
-      
-      const response: Message = {
-        id: (Date.now() + 1).toString(),
-        senderId: bartenderId!,
-        senderName: bartender?.name || "Bartender",
-        content: responses[Math.floor(Math.random() * responses.length)],
-        timestamp: new Date(),
-        type: "text"
-      };
-
-      setMessages(prev => [...prev, response]);
-    }, 2000 + Math.random() * 3000);
   };
 
   const handleBookingRequest = () => {
@@ -127,17 +174,19 @@ const Chat = () => {
       id: Date.now().toString(),
       senderId: "user",
       senderName: "You",
-      content: "I'd like to officially request your services for my event. Please let me know if you're available!",
+      content:
+        "I'd like to officially request your services for my event. Please let me know if you're available!",
       timestamp: new Date(),
-      type: "booking-request"
+      type: "booking-request",
     };
 
-    setMessages(prev => [...prev, bookingMessage]);
+    setMessages((prev) => [...prev, bookingMessage]);
 
     // Show pending request alert
     toast({
       title: "Booking Request Sent",
-      description: "Your booking request has been sent to the bartender. They will respond shortly.",
+      description:
+        "Your booking request has been sent to the bartender. They will respond shortly.",
       duration: 5000,
     });
 
@@ -147,17 +196,19 @@ const Chat = () => {
         id: (Date.now() + 1).toString(),
         senderId: bartenderId!,
         senderName: bartender?.name || "Bartender",
-        content: "Great! I'd be happy to bartend your event. I've accepted your request. You can now proceed to finalize the booking details and payment.",
+        content:
+          "Great! I'd be happy to bartend your event. I've accepted your request. You can now proceed to finalize the booking details and payment.",
         timestamp: new Date(),
-        type: "text"
+        type: "text",
       };
 
-      setMessages(prev => [...prev, acceptanceMessage]);
+      setMessages((prev) => [...prev, acceptanceMessage]);
 
       // Add to cart (simulate)
       toast({
         title: "Request Accepted!",
-        description: "The bartender has accepted your request. Check your cart to proceed with payment.",
+        description:
+          "The bartender has accepted your request. Check your cart to proceed with payment.",
         duration: 5000,
       });
     }, 5000);
@@ -176,8 +227,6 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      
-      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 h-[calc(100vh-80px)]">
         <div className="max-w-4xl mx-auto h-full flex flex-col">
           {/* Chat Header */}
@@ -191,9 +240,11 @@ const Chat = () => {
                       alt={bartender.name}
                       className="w-12 h-12 rounded-full object-cover"
                     />
-                    <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background ${
-                      isOnline ? "bg-green-500" : "bg-gray-400"
-                    }`}></div>
+                    <div
+                      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background ${
+                        isOnline ? "bg-green-500" : "bg-gray-400"
+                      }`}
+                    ></div>
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold">{bartender.name}</h2>
@@ -202,7 +253,7 @@ const Chat = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Button variant="ghost" size="icon">
                     <Phone className="w-5 h-5" />
@@ -241,14 +292,16 @@ const Chat = () => {
                         </Badge>
                       )}
                       <p className="text-sm">{message.content}</p>
-                      <p className={`text-xs mt-1 ${
-                        message.senderId === "user" 
-                          ? "text-primary-foreground/70" 
-                          : "text-muted-foreground"
-                      }`}>
-                        {message.timestamp.toLocaleTimeString([], { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
+                      <p
+                        className={`text-xs mt-1 ${
+                          message.senderId === "user"
+                            ? "text-primary-foreground/70"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })}
                       </p>
                     </div>
@@ -269,7 +322,7 @@ const Chat = () => {
                     Request Booking
                   </Button>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Input
                     placeholder="Type your message..."
@@ -278,7 +331,11 @@ const Chat = () => {
                     onKeyPress={handleKeyPress}
                     className="flex-1"
                   />
-                  <Button onClick={() => sendMessage()} size="icon" variant="hero">
+                  <Button
+                    onClick={() => sendMessage()}
+                    size="icon"
+                    variant="hero"
+                  >
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>

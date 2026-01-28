@@ -19,15 +19,31 @@ Questionnaire.belongsTo(Bartender, { foreignKey: 'email', targetKey: 'email' });
 Bartender.hasMany(BookingRequest, { foreignKey: 'bartenderId' });
 BookingRequest.belongsTo(Bartender, { foreignKey: 'bartenderId' });
 
+// Association for Messages
+const Message = require('./models/message.model');
+BookingRequest.hasMany(Message, { foreignKey: 'bookingId' });
+Message.belongsTo(BookingRequest, { foreignKey: 'bookingId' });
+
 const app = express();
+const http = require('http');
+const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*", // Allow connections from any frontend
+        methods: ["GET", "POST"]
+    }
+});
+
+app.set('io', io); // Make io accessible in controllers
 
 app.use(cors({
-    origin: "*", // your frontend URL
+    origin: "*", 
     credentials: true
   }));
 
 // Middleware
-app.use(cors());
 app.use(express.json());
 const emptyStringsToNull = require('./middleware/emptyStringsToNull.middleware.js');
 app.use(emptyStringsToNull);
@@ -36,7 +52,48 @@ app.use(emptyStringsToNull);
 app.use('/user/auth', authRoutes);  
 app.use('/user/bookings', bookingRoutes);
 app.use('/user/bartenders', bartenderRoutes);
-  
+
+// Socket.io Logic
+io.on('connection', (socket) => {
+    console.log('User joined socket:', socket.id);
+
+    // 1. Join Room (Booking ID)
+    socket.on('join_chat', (data) => {
+        // data = { bookingId: 1 }
+        if (data.bookingId) {
+            socket.join(`booking_${data.bookingId}`);
+            console.log(`Socket ${socket.id} joined booking_${data.bookingId}`);
+        }
+    });
+
+    // 2. Send Message
+    socket.on('send_message', async (data) => {
+        // data = { bookingId, senderId, senderType, content }
+        console.log('Received message payload:', data);
+        try {
+            const Message = require('./models/message.model');
+            const savedMsg = await Message.create({
+                bookingId: parseInt(data.bookingId) || null,
+                senderId: parseInt(data.senderId),
+                senderType: data.senderType,
+                content: data.content
+            });
+            console.log('Message saved to DB:', savedMsg.id);
+            
+            // Broadcast to the specific booking room
+            io.to(`booking_${data.bookingId}`).emit('receive_message', savedMsg);
+            console.log(`Broadcasted to booking_${data.bookingId}`);
+        } catch (e) {
+            console.error('CRITICAL Error saving message:', e);
+            // Optionally emit error back to sender
+            socket.emit('error_message', { message: 'Failed to save message' });
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
 
 const sequelize = require('./db');
 
@@ -60,6 +117,6 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`User Server is running on port ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`User Server (with Socket.io) is running on port ${PORT}`);
 });

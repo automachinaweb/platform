@@ -18,4 +18,10 @@ router.post('/request', verifyToken, bookingController.initiateRequest);
 // A GET request to /:id will call the getBookingById function in the booking controller.
 router.get('/:id', bookingController.getBookingById);
 
+// Get Chat Messages for a Booking
+router.get('/:id/messages', verifyToken, bookingController.getMessages);
+
+// Seed Test Data
+router.post('/seed-test', bookingController.seedTestBooking);
+
 module.exports = router;

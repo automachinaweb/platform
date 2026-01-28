@@ -118,10 +118,28 @@ const getBookingHistory = async (req, res) => {
     }
 };
 
+// NEW: Get Messages for a Booking (Chat History)
+const getMessages = async (req, res) => {
+    try {
+        const { id } = req.params; // Booking ID
+        
+        const Message = require('../models/message.model');
+        const messages = await Message.findAll({
+            where: { bookingId: id },
+            order: [['createdAt', 'ASC']]
+        });
+        
+        res.status(200).json(messages);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getIncomingRequests,
     acceptBooking,
     rejectBooking,
     getMySchedule,
-    getBookingHistory
+    getBookingHistory,
+    getMessages
 };

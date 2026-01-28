@@ -332,3 +332,61 @@ exports.initiateRequest = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// NEW: Get Messages for a Booking (Chat History)
+exports.getMessages = async (req, res) => {
+    try {
+        const { id } = req.params; // Booking ID
+        
+        const Message = require('../models/message.model');
+        const messages = await Message.findAll({
+            where: { bookingId: id },
+            order: [['createdAt', 'ASC']]
+        });
+        
+        res.status(200).json(messages);
+    } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// NEW: Seed Test Data (For Development Use Only)
+exports.seedTestBooking = async (req, res) => {
+    try {
+        const BookingRequest = require('../models/bookingRequest.model');
+        const Bartender = require('../models/bartender.model');
+
+        // 1. Ensure Bartender 1 exists
+        let bartender = await Bartender.findByPk(1);
+        if (!bartender) {
+            bartender = await Bartender.create({
+                email: 'bartender@test.com',
+                password: 'password', // weak hash
+                name: 'Test Bartender',
+                phone: '1234567890'
+            });
+        }
+
+        // 2. Ensure Booking Request 1 exists
+        let request = await BookingRequest.findByPk(1);
+        if (!request) {
+            request = await BookingRequest.create({
+                userId: 1, // Assumes user 1 exists
+                bartenderId: bartender.id,
+                eventType: 'Birthday',
+                eventDate: new Date(),
+                startTime: '18:00',
+                endTime: '22:00',
+                location: 'Test City',
+                guestCount: 50,
+                status: 'PENDING'
+            });
+        }
+
+        res.json({ message: 'Seeded successfully', bookingId: request.id, bartenderId: bartender.id });
+    } catch (error) {
+        console.error("Seeding error:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
